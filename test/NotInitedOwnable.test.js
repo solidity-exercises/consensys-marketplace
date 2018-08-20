@@ -1,4 +1,4 @@
-const NotInitedOwnable = artifacts.require('NotInitedOwnable');
+const NotInitedOwnable = artifacts.require('./NotInitedOwnable');
 
 const assertRevert = require('./utils/test.util').assertRevert;
 const inLogs = require('./utils/test.util').inLogs;
