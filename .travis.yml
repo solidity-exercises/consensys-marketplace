@@ -6,6 +6,8 @@ node_js:
 - "lts/*"
 install: ./ci/install-deps.sh
 script: ./ci/build.sh
+after_script:
+  - npm run coverage && cat coverage/lcov.info | coveralls
 cache:
   directories:
     - node_modules

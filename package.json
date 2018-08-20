@@ -1,0 +1,31 @@
+{
+  "name": "consensys-marketplace",
+  "version": "0.0.1",
+  "description": "ConsenSys Academy Course Project",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test",
+    "coverage": "./node_modules/.bin/solidity-coverage",
+    "solium": "solium -d contracts/",
+    "solium:fix": "solium -d contracts/ --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solidity-exercises/consensys-marketplace.git"
+  },
+  "author": "Stefan Arnaudov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/solidity-exercises/consensys-marketplace/issues"
+  },
+  "homepage": "https://github.com/solidity-exercises/consensys-marketplace#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "solidity-coverage": "0.5.7",
+    "coveralls": "3.0.2"
+  }
+}
