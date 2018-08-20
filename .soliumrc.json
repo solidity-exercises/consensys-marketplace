@@ -11,6 +11,7 @@
         "indentation": [
             "error",
             "tab"
-        ]
+        ],
+        "security/no-inline-assembly": 0
     }
 }
