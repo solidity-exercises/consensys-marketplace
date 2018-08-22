@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
 import './SharedStorage.sol';
-import '../Ownership/NotInitedOwnable.sol';
+import '../ownership/NotInitedOwnable.sol';
 
 
 /**
