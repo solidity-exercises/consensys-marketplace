@@ -3,7 +3,7 @@ const Implementation = artifacts.require("./Implementation.sol");
 const Implementation2 = artifacts.require("./Implementation2.sol");
 const IImplementation = artifacts.require("./IImplementation.sol");
 const IUpgradeableImplementation = artifacts.require("./IOwnableUpgradeableImplementation.sol");
-const assertRevert = require('./utils/test.util').assertRevert;
+const assertRevert = require('../utils/test.util').assertRevert;
 
 contract('UpgradeableProxy', function ([coinbase, another]) {
 

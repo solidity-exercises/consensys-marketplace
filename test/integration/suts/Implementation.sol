@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import "../../contracts/upgradeability/OwnableUpgradeableImplementation.sol";
+import "../../../contracts/upgradeability/OwnableUpgradeableImplementation.sol";
 
 
 contract Implementation is OwnableUpgradeableImplementation {
