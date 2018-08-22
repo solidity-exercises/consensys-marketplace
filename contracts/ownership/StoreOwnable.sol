@@ -39,18 +39,9 @@ contract StoreOwnable {
 	}
 
 	/**
-	* @dev Throws if called by any account other than the owner 
-	* or the marketplace.
-	*/
-	modifier onlyMarketplaceOrOwner() {
-		require(msg.sender == owner || msg.sender == marketplace, 'The msg sender must be the owner or the marketplace');
-		_;
-	}
-
-	/**
 	* @dev Allows the current owner to transfer control of the contract to a new owner, who has to approve the ownership.
 	* @notice The requirement for non-zero address of the `_ownerCandidate`
-	* is intentionally omitted.
+	* is intentionally omitted due to the two-staged implementation.
 	* @param _ownerCandidate The address to transfer ownership to.
 	*/
 	function requestOwnershipTransfer(address _ownerCandidate) public onlyOwner {
