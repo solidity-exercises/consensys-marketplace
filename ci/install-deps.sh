@@ -4,4 +4,3 @@ npm install -g truffle
 npm install -g ganache-cli
 npm install -g solium
 npm install
-truffle install
