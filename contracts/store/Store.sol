@@ -16,6 +16,19 @@ contract Store is MarketplaceStore {
 	*/
 	using SafeMath for uint16;
 
+	event LogProductAdded(uint256 index, bytes30 description);
+	event LogProductUpdated
+	(
+		uint256 index,
+		bytes30 description,
+		uint16 quantity,
+		uint256 price
+	);
+	event LogProductRemoved(uint256 index);
+	event LogProductPriceSet(uint256 index, uint256 newPrice);
+	event LogOwnerWithdrawal(address to, uint256 amount);
+	event LogPurchase(uint256 index, uint256 quantitySold, uint256 salePrice);
+
 	/**
 	* @dev Product structure designed
 	* to pack tightly into 2 storage slots.
@@ -103,7 +116,12 @@ contract Store is MarketplaceStore {
 		onlyOwner
 		hasDescription(_description)
 	{
-		require(products.length <= 65536, 'You have hit the products array upper size limit!');
+		uint256 index = products.length;
+
+		require(index <= 65536, 'You have hit the products array upper size limit!');
+
+		emit LogProductAdded(index, _description);
+
 		products.push(Product({description: _description, quantity: _quantity, price: _price}));
 	}
 
@@ -130,6 +148,8 @@ contract Store is MarketplaceStore {
 		productIndexInRange(_productIndex)
 		hasDescription(_description)
 	{
+		emit LogProductUpdated(_productIndex, _description, _quantity, _price);
+
 		products[_productIndex] = Product({description: _description, quantity: _quantity, price: _price});
 	}
 
@@ -138,6 +158,7 @@ contract Store is MarketplaceStore {
 	* @param _productIndex The index of the product in the products array.
 	*/
 	function removeProduct(uint16 _productIndex) public onlyOwner productIndexInRange(_productIndex) {
+		emit LogProductRemoved(_productIndex);
 		delete products[_productIndex];
 	}
 
@@ -149,6 +170,7 @@ contract Store is MarketplaceStore {
 	* some business use cases using it (eg. sale).
 	*/
 	function setPrice(uint16 _productIndex, uint256 _newPrice) public onlyOwner productIndexInRange(_productIndex) {
+		emit LogProductPriceSet(_productIndex, _newPrice);
 		products[_productIndex].price = _newPrice;
 	}
 
@@ -205,6 +227,8 @@ contract Store is MarketplaceStore {
 	{
 		require(_amount <= address(this).balance, 'Your balance is not sufficient!');
 
+		emit LogOwnerWithdrawal(_recipient, _amount);
+
 		_recipient.transfer(_amount);
 	}
 
@@ -227,6 +251,8 @@ contract Store is MarketplaceStore {
 		require(_quantity > 0, 'Zero quantity purchase not allowed!');
 
 		require(msg.value >= products[_productIndex].price.mul(_quantity), 'You have sent insufficient amount of funds!');
+
+		emit LogPurchase(_productIndex, _quantity, msg.value);
 
 		products[_productIndex].quantity = products[_productIndex].quantity.sub16(_quantity);
 

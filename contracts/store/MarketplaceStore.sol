@@ -17,6 +17,8 @@ contract MarketplaceStore is Pausable {
 	*/
 	using SafeMath for uint256;
 
+	event LogMarketplaceWithdrawal(address to, uint256 amount);
+
 	/**
 	* @dev The marketplace will take 1/1000000 integer part
 	* of every purchase.
@@ -58,6 +60,8 @@ contract MarketplaceStore is Pausable {
 		nonZeroAmount(_amount)
 	{
 		require(_amount <= marketplaceBalance, 'The marketplace balance is not sufficient!');
+
+		emit LogMarketplaceWithdrawal(_recipient, _amount);
 
 		marketplaceBalance = marketplaceBalance.sub(_amount);
 
