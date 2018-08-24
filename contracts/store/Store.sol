@@ -1,7 +1,6 @@
 pragma solidity 0.4.24;
 
-import '../lifecycle/Pausable.sol';
-import '../math/SafeMath.sol';
+import './MarketplaceStore.sol';
 
 
 /**
@@ -9,14 +8,13 @@ import '../math/SafeMath.sol';
  * @dev Holds the main store-related
  * business logic.
  */
-contract Store is Pausable {
+contract Store is MarketplaceStore {
 	/**
 	* @dev Using SafeMath's library 
 	* operations with safety checks against
 	* underflow and overflow.
 	*/
 	using SafeMath for uint16;
-	using SafeMath for uint256;
 
 	/**
 	* @dev Product structure designed
@@ -46,21 +44,6 @@ contract Store is Pausable {
 	*/
 	uint16[16] public storefront;
 
-	/**
-	* @dev The marketplace will take 1/1000000 integer part
-	* of every purchase.
-	* @notice The customer has no incentive to accumulate only
-	* low-value requests(less than 1Mwei), because they will
-	* pay more for transaction gas costs.
-	*/
-	uint24 public constant MARKETPLACE_TAX_DENOMINATOR = 1000000;
-
-	/**
-	* @dev The accumulated balance of the marketplace which can
-	* be withdrawed from it.
-	*/
-	uint256 public marketplaceBalance;
-
 	modifier productIndexInRange(uint16 _i) {
 		require(_i < products.length, 'Index out of range!');
 		_;
@@ -68,16 +51,6 @@ contract Store is Pausable {
 
 	modifier hasDescription(bytes30 _description) {
 		require(_description != 0x0, 'Description can not be blank!');
-		_;
-	}
-
-	modifier nonEmptyRecipient(address _recipient) {
-		require(_recipient != address(0), 'Withdraw recipient must not be empty!');
-		_;
-	}
-
-	modifier nonZeroAmount(uint256 _amount) {
-		require(_amount > 0, 'Zero value transfers not allowed!');
 		_;
 	}
 	
@@ -236,34 +209,21 @@ contract Store is Pausable {
 	}
 
 	/**
-	* @dev Allows the marketplace to withdraw taxes from the store.
-	* @param _recipient The address to transfer the funds to.
-	* @param _amount The amount of the funds transferred.
-	*/
-	function marketplaceWithdraw
-	(
-		address _recipient,
-		uint256 _amount
-	) 
-		public
-		onlyMarketplace
-		nonEmptyRecipient(_recipient)
-		nonZeroAmount(_amount)
-	{
-		require(_amount <= marketplaceBalance, 'The marketplace balance is not sufficient!');
-
-		marketplaceBalance = marketplaceBalance.sub(_amount);
-
-		_recipient.transfer(_amount);
-	}
-
-	/**
 	* @dev Allows the customers to buy given quantity of a specific product.
 	* @param _productIndex The index of the product in the products array.
 	* @param _quantity The _quantity of the product.
 	* @notice If there is a tip from the msg value it is not returned.
 	*/
-	function buy(uint16 _productIndex, uint16 _quantity) public payable productIndexInRange(_productIndex) {
+	function buy
+	(
+		uint16 _productIndex,
+		uint16 _quantity
+	)
+		public
+		payable
+		whenNotPaused
+		productIndexInRange(_productIndex)
+	{
 		require(_quantity > 0, 'Zero quantity purchase not allowed!');
 
 		require(msg.value >= products[_productIndex].price.mul(_quantity), 'You have sent insufficient amount of funds!');
