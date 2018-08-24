@@ -12,6 +12,7 @@ contract Forwardable {
 	* @param _dst Destination address to perform the delegatecall
 	*/
 	function delegatedFwd(address _dst) internal {
+		/* solium-disable-next-line security/no-inline-assembly */
 		assembly {
 			let ptr := mload(0x40)
 			calldatacopy(ptr, 0, calldatasize)

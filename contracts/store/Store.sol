@@ -27,7 +27,12 @@ contract Store is MarketplaceStore {
 	event LogProductRemoved(uint256 index);
 	event LogProductPriceSet(uint256 index, uint256 newPrice);
 	event LogOwnerWithdrawal(address to, uint256 amount);
-	event LogPurchase(uint256 index, uint256 quantitySold, uint256 salePrice);
+	event LogPurchase
+	(
+		uint256 index,
+		uint256 quantitySold,
+		uint256 salePrice
+	);
 
 	/**
 	* @dev Product structure designed
