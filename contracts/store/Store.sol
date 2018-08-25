@@ -16,6 +16,10 @@ contract Store is MarketplaceStore {
 	*/
 	using SafeMath for uint16;
 	
+	/**
+	* @dev Artificial upper limit of the
+	* products array size.
+	*/
 	uint24 public constant MAX_STORE_PRODUCTS = 65536;
 
 	event LogProductAdded(uint256 index, bytes30 description);

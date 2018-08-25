@@ -3,6 +3,12 @@ pragma solidity 0.4.24;
 import './MarketplaceManager.sol';
 import './StoreFactory.sol';
 
+
+/**
+ * @title IStore
+ * @dev Interface to the stores marketplace-related
+ * functionality which is used by the StoreManager contract
+ */
 interface IStore {
 	function destroy() external;
 
@@ -14,7 +20,20 @@ interface IStore {
 }
 
 
+/**
+ * @title StoreManager
+ * @dev Holds the main marketpace store-managing related business logic.
+ * @notice All contracts on this inheritance chain are upgradeable.
+ */
 contract StoreManager is MarketplaceManager {
+	/**
+	* @dev StoreRequest structure holding
+	* the bytes32 IPFS hash of the proposal file or folder
+	* and the owner to be set if the store is approved.
+	* @notice The FIFO manner of request processing
+	* guarantees that no copied/stolen proposal will 
+	* be processed before the original one.
+	*/
 	struct StoreRequest {
 		bytes32 proposal;
 		address owner;
@@ -24,6 +43,10 @@ contract StoreManager is MarketplaceManager {
 
 	StoreRequest[] public storeRequests;
 
+	/**
+	* @dev Artificial upper limit of the
+	* owner's stores array size.
+	*/
 	uint24 public constant MAX_OWNER_STORES = 65536;
 
 	modifier checkRequestIndex() {
@@ -42,6 +65,17 @@ contract StoreManager is MarketplaceManager {
 		_;
 	}
 
+	/**
+	* @dev Provides with transferring store ownership functionality.
+	* @param _storeOwner The current store owner.
+	* @param _storeIndex The current store index in the
+	* store owner's stores array.
+	* @param _newStoreOwner The address to recieve ownership.
+	* @param _newOwnerStoreIndex The index at which to put the new store
+	* in the new store owner's stores array.
+	* @notice Allows the owners to specify an empty index at which to push
+	* the new store in order to fill the deleted stores blank spaces
+	*/
 	function transferStoreOwnership
 	(
 		address _storeOwner,
@@ -60,9 +94,15 @@ contract StoreManager is MarketplaceManager {
 		require(_newOwnerStoreIndex <= len, 'New owner store index out of range!');
 		require(len <= MAX_OWNER_STORES, 'You have hit the stores per owner max limit!');
 
+		// Remove the store from the current
+		// owner stores array.
 		delete stores[_storeOwner][_storeIndex];
 		
+		// If the specified index is equal to the length of
+		// the new owner's stores array -> push the new store
 		if (_newOwnerStoreIndex == len) {
+			// If new owner's stores array length == 0 ->
+			// push new owner to the store owners array
 			if (len == 0) {
 				storeOwners.push(_newStoreOwner);
 			}
@@ -70,11 +110,24 @@ contract StoreManager is MarketplaceManager {
 			return;
 		}
 
+		// If the new owner has specified index in the stores array
+		// lower than it's length, but it is non-empty -> revert
 		require(stores[_newStoreOwner][_newOwnerStoreIndex] == address(0), 'The specified index in the stores array is taken!');
 
+		// If the new owner has specified index in the stores array
+		// lower than it's length and it is empty -> set the 
+		// new store at the specified index.
 		stores[_newStoreOwner][_newOwnerStoreIndex] = msg.sender;
 	}
-	
+
+	/**
+	* @dev Allows marketpalce owner to approve store proposals.
+	* @param _isApproved Specifies whether the
+	* current store proposal is approved.
+	* @param _indexInStoresArray The index at which to put the
+	* new store in the store proposal owner's stores array if approved.
+	* @notice The store requests are processed in FIFO manner.
+	*/
 	function approveStore(bool _isApproved, uint16 _indexInStoresArray) public onlyOwner checkRequestIndex {
 		// If not approved -> continue to next request
 		if (!_isApproved) {
@@ -117,6 +170,14 @@ contract StoreManager is MarketplaceManager {
 		ownerStores[_indexInStoresArray] = newStore;
 	}
 	
+	/**
+	* @dev Allows the marketplace to delete store and
+	* call it's `destruct` function.
+	* @param _storeOwner The store owner of whom
+	* to revoke store.
+	* @param _storeIndex The store index in the
+	* store owner's stores array.
+	*/
 	function revokeStore
 	(
 		address _storeOwner,
@@ -134,12 +195,23 @@ contract StoreManager is MarketplaceManager {
 
 		store.destroy();
 
+		// Check whether the store is destructed.
 		address owner = store.owner();
 		assert(owner == address(0));
 
 		delete stores[_storeOwner][_storeIndex];
 	}
 	
+	/**
+	* @dev Allows the marketplace to withdraw funds
+	* from stores back to the marketplace.
+	* @param _storeOwner The store owner of whom's
+	* store to withdraw.
+	* @param _storeIndex The store index in the
+	* store owner's stores array.
+	* @param _amount The amount of the funds
+	* to be withdrawed.
+	*/
 	function withdrawFromStore
 	(
 		address _storeOwner,

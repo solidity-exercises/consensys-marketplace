@@ -3,6 +3,11 @@ pragma solidity 0.4.24;
 import '../upgradeability/OwnableUpgradeableImplementation.sol';
 
 
+/**
+ * @title MarketplaceManager
+ * @dev Holds the main marketpace managing related business logic.
+ * @notice All contracts on this inheritance chain are upgradeable.
+ */
 contract MarketplaceManager is OwnableUpgradeableImplementation {
 
 	event LogOwnerWithdrawal(address to, uint256 amount);
@@ -21,7 +26,10 @@ contract MarketplaceManager is OwnableUpgradeableImplementation {
 		_;
 	}
 
-	function () public payable {}
+	/**
+	* @dev Payable fallback function
+	*/
+	function() public payable {}
 	
 	/**
 	* @dev Allows the current owner to withdraw funds from the marketplace.
@@ -45,14 +53,31 @@ contract MarketplaceManager is OwnableUpgradeableImplementation {
 		_recipient.transfer(_amount);
 	}
 	
+	/**
+	* @dev Allows verifying whether the specified address
+	* is a store owner.
+	* @param _owner The address to be verified.
+	* @return Boolean variable specifying whether the address
+	* is owner's or not.
+	*/
 	function isStoreOwner(address _owner) public view returns (bool) {
 		return stores[_owner].length != 0;
 	}
 
+	/**
+	* @dev Allows returning the according stores
+	* to the specified address.
+	* @param _owner The address of which stores to get.
+	* @return Array of addresses of stores.
+	*/
 	function getStoresByOwner(address _owner) public view returns (address[]) {
 		return stores[_owner];
 	}
 
+	/**
+	* @dev Allows returning all current store owners.
+	* @return Array of addresses of store owners.
+	*/
 	function getStoreOwners() public view returns (address[]) {
 		return storeOwners;
 	}
