@@ -55,7 +55,7 @@ contract('NotInitedOwnable', function ([coinbase, another]) {
 		// Act
 		const { logs } = await sut.transferOwnership(another);
 		// Assert
-		await inLogs(logs, "OwnershipTransferred", { previousOwner: coinbase, newOwner: another });
+		await inLogs(logs, 'OwnershipTransferred', { previousOwner: coinbase, newOwner: another });
 	});
 
 	it('transferOwnership Should revert When the passed `_newOwner` account equals 0', async function () {

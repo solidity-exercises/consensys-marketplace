@@ -104,5 +104,4 @@ contract('SafeMath', function () {
 			await assertRevert(sut.add(a, b));
 		});
 	});
-
 });

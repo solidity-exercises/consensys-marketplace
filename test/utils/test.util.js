@@ -38,7 +38,7 @@ const util = {
 					reject(err);
 				}
 				resolve(res);
-			})
+			});
 		});
 	},
 
@@ -83,7 +83,7 @@ const util = {
 			const invalidOpcodeReceived = error.message.search('invalid opcode') >= 0;
 			assert(invalidOpcodeReceived, `Expected "invalid opcode", got ${error} instead`);
 		}
-	}
-}
+	},
+};
 
 module.exports = util;
