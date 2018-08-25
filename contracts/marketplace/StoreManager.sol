@@ -106,6 +106,7 @@ contract StoreManager is MarketplaceManager {
 			if (len == 0) {
 				storeOwners.push(_newStoreOwner);
 			}
+			
 			stores[_newStoreOwner].push(msg.sender);
 			return;
 		}
@@ -169,6 +170,13 @@ contract StoreManager is MarketplaceManager {
 		// to the length of the stores array
 		// -> push the new store
 		if (_indexInStoresArray == len) {
+			// If it is the first store
+			// in this array -> push owner
+			// to the owners array
+			if (len == 0) {
+				storeOwners.push(requestOwner);
+			}
+
 			ownerStores.push(newStore);
 			return;
 		}
