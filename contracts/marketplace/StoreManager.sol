@@ -35,11 +35,6 @@ contract StoreManager is MarketplaceManager {
 		require(_i < stores[_owner].length, 'Index out of range!');
 		_;
 	}
-
-	modifier storeExists(address _owner, uint16 _i) {
-		require(stores[_owner][_i] != address(0), 'Specified store does not exist anymore!');
-		_;
-	}
 	
 	function approveStore(bool _isApproved, uint16 _indexInStoresArray) public onlyOwner checkRequestIndex {
 		// If not approved -> continue to next request
@@ -115,9 +110,10 @@ contract StoreManager is MarketplaceManager {
 		onlyOwner
 		nonZeroAddress(_storeOwner)
 		storeIndexInRange(_storeOwner, _storeIndex)
-		storeExists(_storeOwner, _storeIndex)
 	{
 		address storeAddress = stores[_storeOwner][_storeIndex];
+		require(stores[_storeOwner][_storeIndex] != address(0), 'Specified store does not exist anymore!');
+
 		IStore store = IStore(storeAddress);
 
 		store.destroy();
@@ -138,10 +134,11 @@ contract StoreManager is MarketplaceManager {
 		onlyOwner
 		nonZeroAddress(_storeOwner)
 		storeIndexInRange(_storeOwner, _storeIndex)
-		storeExists(_storeOwner, _storeIndex)
 		nonZeroAmount(_amount)
 	{
 		address storeAddress = stores[_storeOwner][_storeIndex];
+		require(stores[_storeOwner][_storeIndex] != address(0), 'Specified store does not exist anymore!');
+		
 		IStore store = IStore(storeAddress);
 
 		// Get the current balances

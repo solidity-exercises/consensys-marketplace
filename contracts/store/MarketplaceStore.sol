@@ -41,7 +41,6 @@ contract MarketplaceStore is Pausable {
 
 	/**
 	* @dev Allows the marketplace to withdraw taxes from the store.
-	* @param _recipient The address to transfer the funds to.
 	* @param _amount The amount of the funds transferred.
 	*/
 	function marketplaceWithdraw
