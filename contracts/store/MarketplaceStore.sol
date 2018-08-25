@@ -17,7 +17,7 @@ contract MarketplaceStore is Pausable {
 	*/
 	using SafeMath for uint256;
 
-	event LogMarketplaceWithdrawal(address to, uint256 amount);
+	event LogMarketplaceWithdrawal(uint256 amount);
 
 	/**
 	* @dev The marketplace will take 1/1000000 integer part
@@ -34,11 +34,6 @@ contract MarketplaceStore is Pausable {
 	*/
 	uint256 public marketplaceBalance;
 
-	modifier nonEmptyRecipient(address _recipient) {
-		require(_recipient != address(0), 'Withdraw recipient must not be empty!');
-		_;
-	}
-
 	modifier nonZeroAmount(uint256 _amount) {
 		require(_amount > 0, 'Zero value transfers not allowed!');
 		_;
@@ -51,20 +46,18 @@ contract MarketplaceStore is Pausable {
 	*/
 	function marketplaceWithdraw
 	(
-		address _recipient,
 		uint256 _amount
 	) 
 		public
 		onlyMarketplace
-		nonEmptyRecipient(_recipient)
 		nonZeroAmount(_amount)
 	{
 		require(_amount <= marketplaceBalance, 'The marketplace balance is not sufficient!');
 
-		emit LogMarketplaceWithdrawal(_recipient, _amount);
+		emit LogMarketplaceWithdrawal(_amount);
 
 		marketplaceBalance = marketplaceBalance.sub(_amount);
 
-		_recipient.transfer(_amount);
+		marketplace.transfer(_amount);
 	}
 }

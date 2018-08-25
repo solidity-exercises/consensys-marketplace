@@ -15,6 +15,8 @@ contract Store is MarketplaceStore {
 	* underflow and overflow.
 	*/
 	using SafeMath for uint16;
+	
+	uint24 public constant MAX_STORE_PRODUCTS = 65536;
 
 	event LogProductAdded(uint256 index, bytes30 description);
 	event LogProductUpdated
@@ -72,6 +74,11 @@ contract Store is MarketplaceStore {
 		_;
 	}
 	
+	modifier nonEmptyRecipient(address _recipient) {
+		require(_recipient != address(0), 'Withdraw recipient must not be empty!');
+		_;
+	}
+
 	/**
 	* @dev Constructor of the Store contract
 	* which sets the owner and marketplace addresses.
@@ -87,7 +94,7 @@ contract Store is MarketplaceStore {
 	/**
 	* @dev Payable fallback function
 	*/
-	function () public payable {}
+	function() public payable {}
 
 	/**
 	* @dev Allows the current owner to encode the storefront of the store.
@@ -121,11 +128,11 @@ contract Store is MarketplaceStore {
 		onlyOwner
 		hasDescription(_description)
 	{
-		uint256 index = products.length;
+		uint256 len = products.length;
 
-		require(index <= 65536, 'You have hit the products array upper size limit!');
+		require(len <= MAX_STORE_PRODUCTS, 'You have hit the products per store max limit!');
 
-		emit LogProductAdded(index, _description);
+		emit LogProductAdded(len, _description);
 
 		products.push(Product({description: _description, quantity: _quantity, price: _price}));
 	}
