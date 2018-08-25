@@ -17,7 +17,7 @@ contract NotInitedOwnable {
 	 * @dev Reverts if called by any account other than the owner's.
 	 */
 	modifier onlyOwner() {
-		require(msg.sender == owner, 'Sender is not an owner');
+		require(msg.sender == owner, 'Msg sender is not an owner');
 		_;
 	}
 

@@ -216,10 +216,6 @@ contract StoreManager is MarketplaceManager {
 
 		store.destroy();
 
-		// Check whether the store is destructed.
-		address owner = store.owner();
-		assert(owner == address(0));
-
 		delete stores[_storeOwner][_storeIndex];
 	}
 	
