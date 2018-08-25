@@ -121,6 +121,19 @@ contract StoreManager is MarketplaceManager {
 	}
 
 	/**
+	* @dev Allows users to request a store.
+	* @param _proposal Hexadecimal representation of an IPFS hash of
+	* file or folder holding the proposal materials.
+	* @notice The proposal argument is a processed hexadecimal
+	* representation of the default IPFS SHA-256 hash with removed prefix.
+	*/
+	function requestStore(bytes32 _proposal) public {
+		require(_proposal != 0x0, 'Store request proposal can not be empty!');
+
+		storeRequests.push(StoreRequest({ proposal: _proposal, owner: msg.sender }));
+	}
+
+	/**
 	* @dev Allows marketpalce owner to approve store proposals.
 	* @param _isApproved Specifies whether the
 	* current store proposal is approved.
