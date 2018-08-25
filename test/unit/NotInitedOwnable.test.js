@@ -1,7 +1,7 @@
 const NotInitedOwnable = artifacts.require('./NotInitedOwnable.sol');
 
-const assertRevert = require('./utils/test.util').assertRevert;
-const inLogs = require('./utils/test.util').inLogs;
+const assertRevert = require('../utils/test.util').assertRevert;
+const inLogs = require('../utils/test.util').inLogs;
 
 contract('NotInitedOwnable', function ([coinbase, another]) {
 	let sut;
