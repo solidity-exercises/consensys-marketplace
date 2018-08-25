@@ -11,6 +11,9 @@ import './Store.sol';
  * except the taxes collected by the marketplace.
  */
 contract DestructibleStore is Store {
+
+	constructor(address _owner) public Store(_owner) {}
+
 	/**
 	* @dev Transfers the current marketplace balance to the marketplace
 	* and all other funds to the owner.
