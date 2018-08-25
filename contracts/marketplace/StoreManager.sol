@@ -13,6 +13,7 @@ interface IStore {
 	function marketplaceBalance() external view returns (uint256);
 }
 
+
 contract StoreManager is MarketplaceManager {
 	struct StoreRequest {
 		bytes32 proposal;
