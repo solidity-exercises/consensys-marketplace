@@ -1,18 +1,26 @@
 pragma solidity 0.4.24;
 
 
+interface IMarketplace {
+	function transferStoreOwnership(address _storeOwner, uint16 _storeIndex, address _newStoreOwner, uint16 _newOwnerStoreIndex) external;
+}
+
+
 /**
  * @title StoreOwnable
  * @dev The StoreOwnable contract holds owner and marketplace addresses, and provides basic authorization control
  * functions, which simplifies the implementation of "user permissions".
  */
 contract StoreOwnable {
-	address public owner;
-	address public ownerCandidate;
-	address public marketplace;
 
-	event OwnershipTransferRequested(address indexed currentOwner, address indexed ownerCandidate);
+	event OwnershipTransferRequested(address indexed currentOwner, address indexed ownerCandidate, uint256 storeIndex);
 	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+	address public owner;
+	address public marketplace;
+	
+	address public ownerCandidate;
+	uint256 public storeIndex;
 
 	/**
 	* @dev Throws if called by any account other than the current owner.
@@ -53,16 +61,22 @@ contract StoreOwnable {
 	* is intentionally omitted due to the two-staged implementation.
 	* @param _ownerCandidate The address to transfer ownership to.
 	*/
-	function requestOwnershipTransfer(address _ownerCandidate) public onlyOwner {
-		emit OwnershipTransferRequested(owner, _ownerCandidate);
+	function requestOwnershipTransfer(address _ownerCandidate, uint256 _storeIndex) public onlyOwner {
+		emit OwnershipTransferRequested(owner, _ownerCandidate, _storeIndex);
 		ownerCandidate = _ownerCandidate;
+		storeIndex = _storeIndex;
 	}
 
 	/**
 	* @dev Allows owner candidate to approve the ownership of the contract.
 	*/
-	function approveOwnershipTransfer() public onlyOwnerCandidate {
+	function approveOwnershipTransfer(uint16 _newStoreIndex) public onlyOwnerCandidate {
 		emit OwnershipTransferred(owner, ownerCandidate);
+
+		IMarketplace m = IMarketplace(marketplace);
+
+		m.transferStoreOwnership(owner, uint16(storeIndex), ownerCandidate, _newStoreIndex);
+
 		owner = ownerCandidate;
 	}
 }

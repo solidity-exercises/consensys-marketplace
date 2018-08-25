@@ -35,6 +35,44 @@ contract StoreManager is MarketplaceManager {
 		require(_i < stores[_owner].length, 'Index out of range!');
 		_;
 	}
+
+	modifier onlySpecifiedStore(address _owner,
+		uint16 _i) {
+		require(msg.sender == stores[_owner][_i], 'The msg sender must be the specified store!');
+		_;
+	}
+
+	function transferStoreOwnership
+	(
+		address _storeOwner,
+		uint16 _storeIndex,
+		address _newStoreOwner,
+		uint16 _newOwnerStoreIndex
+	)
+		external
+		nonZeroAddress(_storeOwner)
+		storeIndexInRange(_storeOwner, _storeIndex)
+		onlySpecifiedStore(_storeOwner, _storeIndex)
+		nonZeroAddress(_newStoreOwner)
+	{
+		uint256 len = stores[_newStoreOwner].length;
+
+		require(_newOwnerStoreIndex <= len, 'Transferred store index out of range!');
+
+		delete stores[_storeOwner][_storeIndex];
+		
+		if (_newOwnerStoreIndex == len) {
+			if (len == 0) {
+				storeOwners.push(_newStoreOwner);
+			}
+			stores[_newStoreOwner].push(msg.sender);
+			return;
+		}
+
+		require(stores[_newStoreOwner][_newOwnerStoreIndex] == address(0), 'The specified index in the stores array is taken!');
+
+		stores[_newStoreOwner][_newOwnerStoreIndex] = msg.sender;
+	}
 	
 	function approveStore(bool _isApproved, uint16 _indexInStoresArray) public onlyOwner checkRequestIndex {
 		// If not approved -> continue to next request
