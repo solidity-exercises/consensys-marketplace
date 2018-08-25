@@ -57,7 +57,8 @@ contract StoreManager is MarketplaceManager {
 	{
 		uint256 len = stores[_newStoreOwner].length;
 
-		require(_newOwnerStoreIndex <= len, 'Transferred store index out of range!');
+		require(_newOwnerStoreIndex <= len, 'New owner store index out of range!');
+		require(len <= MAX_OWNER_STORES, 'You have hit the stores per owner max limit!');
 
 		delete stores[_storeOwner][_storeIndex];
 		
@@ -84,19 +85,13 @@ contract StoreManager is MarketplaceManager {
 		// Get the current request's store owner
 		address requestOwner = storeRequests[nextRequestIndex].owner;
 
-		// Get the current request store owner's stores
+		// Get reference to the current request store owner's stores
 		address[] storage ownerStores = stores[requestOwner];
 
 		uint256 len = ownerStores.length;
 
-		require(_indexInStoresArray < len || (len == 0 && _indexInStoresArray == 0), 'Index in stores array out of range!');
+		require(_indexInStoresArray <= len, 'Index in stores array out of range!');
 		require(len <= MAX_OWNER_STORES, 'You have hit the stores per owner max limit!');
-
-		// If the owner has specified index in the stores array
-		// but it is non-empty -> revert
-		if (_indexInStoresArray != 0 && ownerStores[_indexInStoresArray] != address(0)) {
-			revert('The specified index in the stores array is taken!');
-		}
 
 		// Create the new store and assign it's owner.
 		address newStore = StoreFactory.createStore(requestOwner);
@@ -104,39 +99,22 @@ contract StoreManager is MarketplaceManager {
 		// Increment the request index pointer.
 		nextRequestIndex++;
 
-		if (_indexInStoresArray != 0) {
-			// Index is specified
-			// and it is already
-			// checked that it is
-			// empty -> add new store to index
-			ownerStores[_indexInStoresArray] = newStore;
-			return;
-		}
-
-		// The index in the stores
-		// is 0 and the length of the
-		// stores is 0 -> push new store
-		if (len == 0) {
+		// If the passed index is equal
+		// to the length of the stores array
+		// -> push the new store
+		if (_indexInStoresArray == len) {
 			ownerStores.push(newStore);
 			return;
 		}
 
-		// The length of the stores
-		// is not 0, but the store
-		// at the 0 index has been
-		// deleted(is empty) ->
-		// add new store to index
-		if (ownerStores[0] == address(0)) {
-			ownerStores[0] = newStore;
-			return;
-		}
+		// If the owner has specified index in the stores array
+		// lower than it's length, but it is non-empty -> revert
+		require(ownerStores[_indexInStoresArray] != address(0), 'The specified index in the stores array is taken!');
 
-		// Length is not 0,
-		// zero index is not empty
-		// -> push new store
-		// (interpret index as
-		// optional parameter)
-		ownerStores.push(newStore);
+		// If the owner has specified index in the stores array
+		// lower than it's length and it is empty -> set the 
+		// new store at the specified index.
+		ownerStores[_indexInStoresArray] = newStore;
 	}
 	
 	function revokeStore
