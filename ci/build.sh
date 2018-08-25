@@ -4,7 +4,7 @@ set -e
 
 solium -d contracts/ --fix
 
-ganache-cli -l 0xfffffffffff -g 0x01 -e 4200 -m "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" > /dev/null &
+ganache-cli --allowUnlimitedContractSize -l 0xfffffffffff -g 0x01 -e 4200 -m "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" > /dev/null &
 TESTRPC_PID=$!
 trap "kill $TESTRPC_PID" EXIT INT TERM
 

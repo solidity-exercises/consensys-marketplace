@@ -1,6 +1,8 @@
-const DestructibleStore = artifacts.require('./DestructibleStore.sol');
+const StoreManager = artifacts.require('./StoreManager.sol');
+const StoreFactory = artifacts.require('./StoreFactory.sol');
 
 module.exports = function (deployer, ...args) {
-	const coinbase = args[1][0];
-	deployer.deploy(DestructibleStore, coinbase);
+	deployer.deploy(StoreFactory);
+	deployer.link(StoreFactory, StoreManager);
+	deployer.deploy(StoreManager);
 };
