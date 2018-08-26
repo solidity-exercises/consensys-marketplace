@@ -251,7 +251,7 @@ contract StoreManager is MarketplaceManager {
 		nonZeroAddress(_storeAddress)
 		nonZeroAmount(_amount)
 	{
-		IStore store = IStore(storeAddress);
+		IStore store = IStore(_storeAddress);
 
 		// Get the current balances
 		uint256 currentMarketplaceBalance = address(this).balance;

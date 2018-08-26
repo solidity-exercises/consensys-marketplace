@@ -18,5 +18,5 @@ interface IStoreManager {
 
 	function revokeStore(address _storeOwner, uint16 _storeIndex) external;
 
-	function withdrawFromStore(address _storeOwner, uint16 _storeIndex, uint256 _amount) external;
+	function withdrawFromStore(address _storeAddress, uint256 _amount) external;
 }
