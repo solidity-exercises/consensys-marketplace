@@ -12,8 +12,6 @@ import './StoreFactory.sol';
 interface IStore {
 	function destroy() external;
 
-	function owner() external view returns (address);
-
 	function marketplaceWithdraw(uint256 _amount) external;
 
 	function marketplaceBalance() external view returns (uint256);
@@ -195,7 +193,7 @@ contract StoreManager is MarketplaceManager {
 
 		// If the owner has specified index in the stores array
 		// lower than it's length, but it is non-empty -> revert
-		require(ownerStores[_indexInStoresArray] != address(0), 'The specified index in the stores array is taken!');
+		require(ownerStores[_indexInStoresArray] == address(0), 'The specified index in the stores array is taken!');
 
 		// If the owner has specified index in the stores array
 		// lower than it's length and it is empty -> set the 

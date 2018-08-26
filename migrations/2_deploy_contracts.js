@@ -1,3 +1,4 @@
+/* eslint-disable */
 const StoreManager = artifacts.require('./StoreManager.sol');
 const UpgradeableProxy = artifacts.require('./UpgradeableProxy.sol');
 const Aggregated = artifacts.require('./Aggregated.sol');
