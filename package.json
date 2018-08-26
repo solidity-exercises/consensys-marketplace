@@ -24,8 +24,6 @@
   "homepage": "https://github.com/solidity-exercises/consensys-marketplace#readme",
   "dependencies": {},
   "devDependencies": {
-    "chai": "4.1.2",
-    "chai-bignumber": "2.0.2",
     "coveralls": "3.0.2",
     "solidity-coverage": "0.5.7",
     "web3-utils": "1.0.0-beta.35"
