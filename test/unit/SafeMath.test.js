@@ -20,7 +20,7 @@ contract('SafeMath', function () {
 			const a = new BigNumber(5678);
 			const b = new BigNumber(1234);
 			// Act
-			const result = await sut.sub16(a, b);
+			const result = await sut.sub16.call(a, b);
 			// Assert
 			assert.deepEqual(result, a.minus(b));
 		});
@@ -41,7 +41,7 @@ contract('SafeMath', function () {
 			const a = new BigNumber(5678);
 			const b = new BigNumber(1234);
 			// Act
-			const result = await sut.add16(a, b);
+			const result = await sut.add16.call(a, b);
 			// Assert
 			assert.deepEqual(result, a.plus(b));
 		});
@@ -62,7 +62,7 @@ contract('SafeMath', function () {
 			const a = new BigNumber(1234);
 			const b = new BigNumber(5678);
 			// Act
-			const result = await sut.mul(a, b);
+			const result = await sut.mul.call(a, b);
 			// Assert
 			assert.deepEqual(result, a.times(b));
 		});
@@ -72,7 +72,7 @@ contract('SafeMath', function () {
 			const a = new BigNumber(0);
 			const b = new BigNumber(5678);
 			// Act
-			const result = await sut.mul(a, b);
+			const result = await sut.mul.call(a, b);
 			// Assert
 			assert.deepEqual(result, a.times(b));
 		});
@@ -93,7 +93,7 @@ contract('SafeMath', function () {
 			const a = new BigNumber(5678);
 			const b = new BigNumber(1234);
 			// Act
-			const result = await sut.sub(a, b);
+			const result = await sut.sub.call(a, b);
 			// Assert
 			assert.deepEqual(result, a.minus(b));
 		});
@@ -114,7 +114,7 @@ contract('SafeMath', function () {
 			const a = new BigNumber(5678);
 			const b = new BigNumber(1234);
 			// Act
-			const result = await sut.add(a, b);
+			const result = await sut.add.call(a, b);
 			// Assert
 			assert.deepEqual(result, a.plus(b));
 		});
