@@ -45,13 +45,13 @@ contract('Store Inheritance Chain', function ([owner, market, another]) {
 			await assertRevert(result);
 		});
 
-		it('requestOwnershipTransfer Should raise OwnershipTransferRequested event When invoked from owner', async function () {
+		it('requestOwnershipTransfer Should raise LogOwnershipTransferRequested event When invoked from owner', async function () {
 			// Arrange
 			sut = await DestructibleStore.new(owner, { from: market });
 			// Act
 			const { logs } = await sut.requestOwnershipTransfer(another, 0);
 			// Assert
-			await inLogs(logs, 'OwnershipTransferRequested', { currentOwner: owner, ownerCandidate: another, storeIndex: new BigNumber(0) });
+			await inLogs(logs, 'LogOwnershipTransferRequested', { currentOwner: owner, ownerCandidate: another, storeIndex: new BigNumber(0) });
 		});
 
 		it('requestOwnershipTransfer Should set ownerCandidate to the passed value When invoked from owner', async function () {
@@ -98,13 +98,13 @@ contract('Store Inheritance Chain', function ([owner, market, another]) {
 			sut = await DestructibleStore.at(storeAddress);
 		});
 
-		it('approveOwnershipTransfer Should emit OwnershipTransferred event When invoked from owner candidate with valid arguments', async function () {
+		it('approveOwnershipTransfer Should emit LogOwnershipTransferred event When invoked from owner candidate with valid arguments', async function () {
 			// Arrange
 			await sut.requestOwnershipTransfer(another, 0);
 			// Act
 			const { logs } = await sut.approveOwnershipTransfer(0, { from: another });
 			// Assert
-			await inLogs(logs, 'OwnershipTransferred', { previousOwner: owner, newOwner: another });
+			await inLogs(logs, 'LogOwnershipTransferred', { previousOwner: owner, newOwner: another });
 		});
 
 		it('approveOwnershipTransfer Should revert When invoked from owner candidate with wrong current store index', async function () {
@@ -230,12 +230,12 @@ contract('Store Inheritance Chain', function ([owner, market, another]) {
 			assertRevert(result);
 		});
 
-		it('pause Should emit Pause event When valid call is made', async function () {
+		it('pause Should emit LogPause event When valid call is made', async function () {
 			// Arrange
 			// Act
 			const { logs } = await sut.pause();
 			// Assert
-			await inLogs(logs, 'Pause');
+			await inLogs(logs, 'LogPause');
 		});
 
 		it('pause Should set paused to true When valid call is made', async function () {
@@ -255,12 +255,12 @@ contract('Store Inheritance Chain', function ([owner, market, another]) {
 			assertRevert(result);
 		});
 
-		it('unpause Should emit Unpause event When valid call is made', async function () {
+		it('unpause Should emit LogUnpause event When valid call is made', async function () {
 			// Arrange
 			// Act
 			const { logs } = await sut.unpause();
 			// Assert
-			await inLogs(logs, 'Unpause');
+			await inLogs(logs, 'LogUnpause');
 		});
 
 		it('unpause Should set paused to false When valid call is made', async function () {

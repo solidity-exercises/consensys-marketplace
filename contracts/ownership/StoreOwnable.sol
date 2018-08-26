@@ -18,8 +18,8 @@ interface IMarketplace {
  */
 contract StoreOwnable {
 
-	event OwnershipTransferRequested(address indexed currentOwner, address indexed ownerCandidate, uint256 storeIndex);
-	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+	event LogOwnershipTransferRequested(address indexed currentOwner, address indexed ownerCandidate, uint256 storeIndex);
+	event LogOwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
 	address public owner;
 	address public marketplace;
@@ -68,7 +68,7 @@ contract StoreOwnable {
 	* @param _storeIndex The index of the current store to be transferred.
 	*/
 	function requestOwnershipTransfer(address _ownerCandidate, uint256 _storeIndex) public onlyOwner {
-		emit OwnershipTransferRequested(owner, _ownerCandidate, _storeIndex);
+		emit LogOwnershipTransferRequested(owner, _ownerCandidate, _storeIndex);
 		ownerCandidate = _ownerCandidate;
 		storeIndex = _storeIndex;
 	}
@@ -79,7 +79,7 @@ contract StoreOwnable {
 	* in the new owner's stores array.
 	*/
 	function approveOwnershipTransfer(uint16 _newStoreIndex) public onlyOwnerCandidate {
-		emit OwnershipTransferred(owner, ownerCandidate);
+		emit LogOwnershipTransferred(owner, ownerCandidate);
 
 		IMarketplace m = IMarketplace(marketplace);
 		m.transferStoreOwnership(owner, uint16(storeIndex), ownerCandidate, _newStoreIndex);

@@ -8,8 +8,8 @@ import '../ownership/StoreOwnable.sol';
  * @dev Base contract which allows children to implement an emergency stop mechanism.
  */
 contract Pausable is StoreOwnable {
-	event Pause();
-	event Unpause();
+	event LogPause();
+	event LogUnpause();
 
 	bool public paused = false;
 
@@ -25,7 +25,7 @@ contract Pausable is StoreOwnable {
 	* @dev called by the owner to pause, triggers stopped state
 	*/
 	function pause() public onlyOwner {
-		emit Pause();
+		emit LogPause();
 		paused = true;
 	}
 
@@ -33,7 +33,7 @@ contract Pausable is StoreOwnable {
 	* @dev called by the owner to unpause, returns to normal state
 	*/
 	function unpause() public onlyOwner {
-		emit Unpause();
+		emit LogUnpause();
 		paused = false;
 	}
 }

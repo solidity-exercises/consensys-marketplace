@@ -11,7 +11,7 @@ pragma solidity 0.4.24;
 contract NotInitedOwnable {
 	address public owner;
 
-	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+	event LogOwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
 	/**
 	 * @dev Reverts if called by any account other than the owner's.
@@ -35,7 +35,7 @@ contract NotInitedOwnable {
 	 */
 	function transferOwnership(address _newOwner) public onlyOwner {
 		require(_newOwner != address(0), '_newOwner address can not be 0');
-		emit OwnershipTransferred(owner, _newOwner);
+		emit LogOwnershipTransferred(owner, _newOwner);
 		owner = _newOwner;
 	}
 }

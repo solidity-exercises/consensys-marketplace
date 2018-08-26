@@ -11,7 +11,7 @@ import '../ownership/NotInitedOwnable.sol';
  */
 contract OwnableUpgradeableImplementation is SharedStorage, NotInitedOwnable {
 	
-	event UpgradedContract(address indexed newImplementation);
+	event LogUpgradedContract(address indexed newImplementation);
 
 	/**
 	 * @dev Allows the current owner to upgrade the implementation
@@ -20,7 +20,7 @@ contract OwnableUpgradeableImplementation is SharedStorage, NotInitedOwnable {
 	 */
 	function upgradeImplementation(address _newImplementation) public onlyOwner {
 		require(_newImplementation != address(0), '_newImplementation can not be 0');
-		emit UpgradedContract(_newImplementation);
+		emit LogUpgradedContract(_newImplementation);
 		contractImplementation = _newImplementation;
 	}
 }
