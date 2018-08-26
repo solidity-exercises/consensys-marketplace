@@ -6,6 +6,14 @@ pragma solidity 0.4.24;
  * @dev Interface of the StoreManager contract.
  */
 interface IStoreManager {
+	event LogStoreRequested(uint256 requestIndex);
+	
+	event LogStoreApproved(uint256 requestIndex, address indexed owner, address store);
+
+	event LogStoreRevoked(address indexed owner, address indexed store);
+
+	event LogStoreWithdrawal(address indexed store, uint256 amount);
+
 	function nextRequestIndex() external view returns (uint256);
 
 	function storeRequests(uint256 _index) external view returns (bytes32, address);

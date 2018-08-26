@@ -6,6 +6,8 @@ pragma solidity 0.4.24;
  * @dev Interface of the MarketplaceManager contract.
  */
 interface IMarketplaceManager {
+	event LogOwnerWithdrawal(address to, uint256 amount);
+	
 	function storeOwners(uint256 index) external view returns (address);
 
 	function stores(address owner, uint256 index) external view returns (address);

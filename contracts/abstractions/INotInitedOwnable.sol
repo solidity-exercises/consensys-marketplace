@@ -6,7 +6,9 @@ pragma solidity 0.4.24;
  * @dev Interface of the NotInitedOwnable contract.
  */
 interface INotInitedOwnable {
-    function owner() external view returns (address);
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+	
+	function owner() external view returns (address);
 
     function init() external;
 
