@@ -26,6 +26,12 @@ interface IStore {
  * @notice All contracts on this inheritance chain are upgradeable.
  */
 contract StoreManager is MarketplaceManager {
+
+	event LogStoreRequested(uint256 requestIndex);
+	event LogStoreApproved(uint256 requestIndex, address indexed owner, address store);
+	event LogStoreRevoked(address indexed owner, address indexed store);
+	event LogStoreWithdrawal(address indexed store, uint256 amount);
+
 	/**
 	* @dev StoreRequest structure holding
 	* the bytes32 IPFS hash of the proposal file or folder
@@ -131,6 +137,10 @@ contract StoreManager is MarketplaceManager {
 	function requestStore(bytes32 _proposal) public {
 		require(_proposal != 0x0, 'Store request proposal can not be empty!');
 
+		uint256 requestIndex = storeRequests.length;
+
+		emit LogStoreRequested(requestIndex);
+
 		storeRequests.push(StoreRequest({ proposal: _proposal, owner: msg.sender }));
 	}
 
@@ -162,6 +172,8 @@ contract StoreManager is MarketplaceManager {
 
 		// Create the new store and assign it's owner.
 		address newStore = StoreFactory.createStore(requestOwner);
+
+		emit LogStoreApproved(nextRequestIndex, requestOwner, newStore);
 
 		// Increment the request index pointer.
 		nextRequestIndex++;
@@ -212,6 +224,8 @@ contract StoreManager is MarketplaceManager {
 		address storeAddress = stores[_storeOwner][_storeIndex];
 		require(stores[_storeOwner][_storeIndex] != address(0), 'Specified store does not exist anymore!');
 
+		emit LogStoreRevoked(_storeOwner, storeAddress);
+
 		IStore store = IStore(storeAddress);
 
 		store.destroy();
@@ -251,6 +265,8 @@ contract StoreManager is MarketplaceManager {
 		uint256 currentStoreMarketplaceBalance = store.marketplaceBalance();
 
 		require(_amount >= currentStoreMarketplaceBalance, 'Marketplace Store Balance too small to withdraw!');
+
+		emit LogStoreWithdrawal(store, _amount);
 
 		store.marketplaceWithdraw(_amount);
 
