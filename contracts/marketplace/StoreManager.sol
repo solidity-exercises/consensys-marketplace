@@ -236,28 +236,21 @@ contract StoreManager is MarketplaceManager {
 	/**
 	* @dev Allows the marketplace to withdraw funds
 	* from stores back to the marketplace.
-	* @param _storeOwner The store owner of whom's
-	* store to withdraw.
-	* @param _storeIndex The store index in the
-	* store owner's stores array.
+	* @param _storeAddress The address of the store
+	* from which to withdraw.
 	* @param _amount The amount of the funds
 	* to be withdrawed.
 	*/
 	function withdrawFromStore
 	(
-		address _storeOwner,
-		uint16 _storeIndex,
+		address _storeAddress,
 		uint256 _amount
 	)
 		public
 		onlyOwner
-		nonZeroAddress(_storeOwner)
-		storeIndexInRange(_storeOwner, _storeIndex)
+		nonZeroAddress(_storeAddress)
 		nonZeroAmount(_amount)
 	{
-		address storeAddress = stores[_storeOwner][_storeIndex];
-		require(stores[_storeOwner][_storeIndex] != address(0), 'Specified store does not exist anymore!');
-		
 		IStore store = IStore(storeAddress);
 
 		// Get the current balances
