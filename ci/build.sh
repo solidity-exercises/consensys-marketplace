@@ -8,8 +8,6 @@ ganache-cli --allowUnlimitedContractSize -l 0xfffffffffff -g 0x01 -e 4200 -m "ca
 TESTRPC_PID=$!
 trap "kill $TESTRPC_PID" EXIT INT TERM
 
-truffle compile
-truffle migrate
 truffle test
 
 #(0) 0x627306090abab3a6e1400e9345bc60c78a8bef57
