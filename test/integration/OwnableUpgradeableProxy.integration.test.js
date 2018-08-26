@@ -86,5 +86,13 @@ contract('UpgradeableProxy', function ([coinbase, another]) {
 			// Assert
 			await assertRevert(upgradeableContract.upgradeImplementation(impl2.address, { from: another }));
 		});
+
+		it('should throw on upgrade contract with empty address', async function () {
+			// Arrange
+			// Act
+			const upgradeableContract = await IUpgradeableImplementation.at(proxy.address);
+			// Assert
+			await assertRevert(upgradeableContract.upgradeImplementation('0x0'));
+		});
 	});
 });
