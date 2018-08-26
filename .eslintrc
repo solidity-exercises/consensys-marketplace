@@ -67,11 +67,7 @@
 			"error",
 			"unix"
 		],
-		"max-len": [
-			"error",
-			180,
-			2
-		],
+		"max-len": 0,
 		"no-debugger": "off",
 		"no-dupe-args": "error",
 		"no-dupe-keys": "error",
