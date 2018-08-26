@@ -1,0 +1,31 @@
+<h1 class="display-6 text-center" *ngIf='isContractDestroyed'>Current Contract instance has been
+	<b>Destroyed!</b>
+</h1>
+<div class="jumbotron jumbotron-fluid" *ngIf='!isContractDestroyed'>
+	<div class="container text-center">
+		<h1 class="display-3">Receipts Report</h1>
+		<form>
+			<div class="form-group">
+				<label>Owner Address
+					<input type="text" name="owner-address" class="form-control" aria-describedby="ownerAddress" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
+					 required [(ngModel)]='report.owner'>
+				</label>
+			</div>
+			<button type="button" class="btn btn-outline-dark" (click)="getReceiptsReport()">Get Report</button>
+		</form>
+		<div class="row">
+			<div class="col-md-6" *ngFor='let receipt of report.receipts'>
+				<div class="card">
+					<div class="card-header">
+						Receipt
+					</div>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item">Domain Name: {{receipt.domainName}}</li>
+						<li class="list-group-item">Amount Paid: {{receipt.amountPaid}} ETH</li>
+						<li class="list-group-item">Date of Purchase: {{receipt.timeBought | date:'full'}}</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

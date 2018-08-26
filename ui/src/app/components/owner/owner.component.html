@@ -1,0 +1,181 @@
+<h1 class="display-6 text-center" *ngIf='isContractDestroyed'>Current Contract instance has been
+	<b>Destroyed!</b>
+</h1>
+<div class="jumbotron jumbotron-fluid" *ngIf='!isContractDestroyed'>
+	<div class="container text-center">
+		<h1 class="display-6">Owner Operations</h1>
+		<blockquote class="blockquote">
+			<p class="lead mb-0">
+				<b>Contract Owner: </b>{{contractInfo.owner}}</p>
+			<p class="lead mb-0">
+				<b>Contract Wallet: </b>{{contractInfo.wallet}}</p>
+			<footer class="blockquote-footer">You must be the contract owner in order to perform this operations.
+			</footer>
+		</blockquote>
+	</div>
+	<div id="accordion">
+		<div class="card text-center">
+			<div class="card-header" id="headingOne">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+						Change Registration Cost
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Registration Cost</h5>
+					<form>
+						<div class="form-group">
+							<label>New Registration Cost (ETH)
+								<input type="text" name="registration-cost" class="form-control" aria-describedby="registrationCost" placeholder="3.14(ETH)"
+								 required [(ngModel)]='newRegistrationCost'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="changeRegistrationCost()">Change Cost</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingTwo">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+						Change Expiry Period
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Expiry Period</h5>
+					<form>
+						<div class="form-group">
+							<label>New Expiry Period (days)
+								<input type="text" name="expiry-period" class="form-control" aria-describedby="expiryPeriod" placeholder="42(days)" required
+								 [(ngModel)]='newExpiryPeriod'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="changeExpiryPeriod()">Change Period</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="card text-center">
+			<div class="card-header" id="headingThree">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+						Change Wallet Address
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Change Wallet</h5>
+					<form>
+						<div class="form-group">
+							<label>New Wallet Address
+								<input type="text" name="new-wallet" class="form-control" aria-describedby="newWallet" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
+								 required [(ngModel)]='newWallet'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="changeWallet()">Change Wallet</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="card text-center">
+			<div class="card-header" id="headingFour">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+						Withdraw
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Withdrawal Details</h5>
+					<form>
+						<div class="form-group">
+							<label>Withdraw Amount (ETH)
+								<input type="text" name="withdraw-amount" class="form-control" aria-describedby="withdrawAmount" placeholder="42(ETH)" required
+								 [(ngModel)]='withdrawAmount'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="withdrawEthers()">Withdraw</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="card text-center">
+			<div class="card-header" id="headingFive">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+						Set New Owner
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">New Owner Details</h5>
+					<form>
+						<div class="form-group">
+							<label>New Owner Address
+								<input type="text" name="new-owner-address" class="form-control" aria-describedby="newOwnerAddress" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
+								 required [(ngModel)]='newOwner'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-danger" (click)="setNewOwner()">Set New Owner</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingSix">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+						Destroy Contract
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Destroy Contract</h5>
+					<button type="button" class="btn btn-outline-danger" (click)="destroy()">Destroy!</button>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingSeven">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+						Destroy Contract And Send Funds
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Recipient Details</h5>
+					<form>
+						<div class="form-group">
+							<label>Recipient Address
+								<input type="text" name="recipient-address" class="form-control" aria-describedby="recipientAddress" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
+								 required [(ngModel)]='recipient'>
+							</label>
+							<button type="button" class="btn btn-outline-danger" (click)="destroyAndSend()">Destroy and Send!</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

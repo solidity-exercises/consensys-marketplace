@@ -1,0 +1,217 @@
+<h1 class="display-6 text-center" *ngIf='isContractDestroyed'>Current Contract instance has been
+	<b>Destroyed!</b>
+</h1>
+<div class="jumbotron jumbotron-fluid" *ngIf='!isContractDestroyed'>
+	<div class="container text-center">
+		<h1 class="display-6">Domain Operations</h1>
+	</div>
+	<div id="accordion">
+		<div class="card text-center">
+			<div class="card-header" id="headingOne">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne"
+					 (click)='clearRegistration()'>
+						Register Domain
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Register Domain Details</h5>
+					<form>
+						<div class="form-group">
+							<label>Domain name
+								<input type="text" name="domain-name" class="form-control" aria-describedby="domainName" placeholder="mydomain" required
+								 [(ngModel)]='registration.domainName'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>Top Level Domain
+								<input type="text" name="top-level-domain" class="form-control" placeholder="co.uk" required [(ngModel)]='registration.topLevelDomain'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>Ip Address
+								<input type="text" name="ip-address" class="form-control" placeholder="127.0.0.1" required [(ngModel)]='registration.ipAddress'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="registerDomain()">Submit Registration</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingTwo">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo"
+					 (click)='clearRenew()'>
+						Renew Domain Registration
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Renew Domain Details</h5>
+					<form>
+						<div class="form-group">
+							<label>Domain name
+								<input type="text" name="domain-name" class="form-control" aria-describedby="domainName" placeholder="mydomain" required
+								 [(ngModel)]='renew.domainName'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>Top Level Domain
+								<input type="text" name="top-level-domain" class="form-control" placeholder="co.uk" required [(ngModel)]='renew.topLevelDomain'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="renewDomainRegistration()">Renew Registration</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingThree">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false"
+					 aria-controls="collapseThree" (click)='clearEditIp()'>
+						Edit Domain Ip
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Edit Domain Ip Details</h5>
+					<form>
+						<div class="form-group">
+							<label>Domain name
+								<input type="text" name="domain-name" class="form-control" aria-describedby="domainName" placeholder="mydomain" required
+								 [(ngModel)]='editIp.domainName'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>Top Level Domain
+								<input type="text" name="top-level-domain" class="form-control" placeholder="co.uk" required [(ngModel)]='editIp.topLevelDomain'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>New Ip Address
+								<input type="text" name="ip-address" class="form-control" placeholder="255.255.255.0" required [(ngModel)]='editIp.newIp'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="editDomainIp()">Edit Ip</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingFour">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour"
+					 (click)='clearTransfer()'>
+						Transfer Domain Ownership
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Transfer Domain Ownership Details</h5>
+					<form>
+						<div class="form-group">
+							<label>Domain name
+								<input type="text" name="domain-name" class="form-control" aria-describedby="domainName" placeholder="mydomain" required
+								 [(ngModel)]='transfer.domainName'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>Top Level Domain
+								<input type="text" name="top-level-domain" class="form-control" placeholder="co.uk" required [(ngModel)]='transfer.topLevelDomain'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>New Owner Address
+								<input type="text" name="new-owner-address" class="form-control" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
+								 required [(ngModel)]='transfer.newOwner'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="transferOwnership()">Transfer Ownership</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingFive">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive"
+					 (click)='clearDomainDetails()'>
+						Get Domain Details
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Get Domain Details</h5>
+					<form (keyup)='clearDomainDetails($event)'>
+						<div class="form-group">
+							<label>Domain name
+								<input type="text" name="domain-name" class="form-control" aria-describedby="domainName" placeholder="mydomain" required
+								 [(ngModel)]='domainDetails.domainName'>
+							</label>
+						</div>
+						<div class="form-group">
+							<label>Top Level Domain
+								<input type="text" name="top-level-domain" class="form-control" placeholder="co.uk" required [(ngModel)]='domainDetails.topLevelDomain'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="getDomainDetails()">Get Details</button>
+					</form>
+				</div>
+				<div class="card-footer" *ngIf='domainDetails.ipAddress'>
+					<blockquote class="blockquote text-center">
+						<p class="mb-0">Ip Address: {{domainDetails.ipAddress}}</p>
+						<p class="mb-0">Valid Until: {{domainDetails.validUntil | date:'full'}}</p>
+						<p class="mb-0">Domain Owner: {{domainDetails.owner}}</p>
+						<footer class="blockquote-footer">{{domainDetails.domainName}}.{{domainDetails.topLevelDomain}}
+						</footer>
+					</blockquote>
+				</div>
+			</div>
+		</div>
+		<div class="card text-center">
+			<div class="card-header" id="headingSix">
+				<h5 class="mb-0">
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix"
+					 (click)='clearDomainPrice()'>
+						Get Domain Registration Price
+					</button>
+				</h5>
+			</div>
+
+			<div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordion">
+				<div class="card-body">
+					<h5 class="card-title">Get Domain Registration Price Details</h5>
+					<form (keyup)='clearDomainPrice($event)'>
+						<div class="form-group">
+							<label>Domain name
+								<input type="text" name="domain-name" class="form-control" aria-describedby="domainName" placeholder="mydomain" required
+								 [(ngModel)]='domainPrice.domainName'>
+							</label>
+							<button type="button" class="btn btn-outline-dark" (click)="getDomainPrice()">Get Price</button>
+						</div>
+					</form>
+				</div>
+				<div class="card-footer" *ngIf='domainPrice.price'>
+					<blockquote class="blockquote text-center">
+						<p class="mb-0">Domain Price: {{domainPrice.price}} ETH.</p>
+						<footer class="blockquote-footer">Showing Price for {{domainPrice.domainName}}.
+						</footer>
+					</blockquote>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
