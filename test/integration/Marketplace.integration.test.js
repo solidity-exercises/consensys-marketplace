@@ -16,7 +16,7 @@ contract('Marketplace', function ([owner, storeOwner, another]) {
 		const marketplaceImplementation = await StoreManager.new();
 		const proxy = await UpgradeableProxy.new(marketplaceImplementation.address);
 		sut = await Aggregated.at(proxy.address);
-		await sut.init();
+		await sut.init({ from: owner });
 	});
 
 	describe('MarketplaceManager', () => {
@@ -27,9 +27,9 @@ contract('Marketplace', function ([owner, storeOwner, another]) {
 			await sut.approveStore(true, 0);
 			const storeAddress = await sut.stores.call(storeOwner, 0);
 			store = await DestructibleStore.at(storeAddress);
-			await store.addProduct(0x1, 1, 1000000, { from: storeOwner });
-			await store.buy(0, 1, { from: another, value: 1000000 });
-			await sut.withdrawFromStore(store.address, 1);
+			await store.addProduct.sendTransaction(0x1, 1, 1000000, { from: storeOwner });
+			await store.buy.sendTransaction(0, 1, { from: another, value: 1000000 });
+			await sut.withdrawFromStore.sendTransaction(store.address, 1, { from: owner });
 		});
 
 		it('ownerWithdraw Should revert When called from non-owner', async function () {
@@ -421,10 +421,10 @@ contract('Marketplace', function ([owner, storeOwner, another]) {
 			const storeAddress = ownersStores[0];
 
 			const store = await DestructibleStore.at(storeAddress);
-			await store.addProduct(0x1, 1, 1000000);
-			await store.buy(0, 1, { from: another, value: 1000000 });
+			await store.addProduct.sendTransaction(0x1, 1, 1000000, { from: owner });
+			await store.buy.sendTransaction(0, 1, { from: another, value: 1000000 });
 			// Act
-			const { logs } = await sut.withdrawFromStore(storeAddress, 1);
+			const { logs } = await sut.withdrawFromStore(storeAddress, 1, { from: owner });
 			// Assert
 			await inLogs(logs, 'LogStoreWithdrawal', { 'store': storeAddress, 'amount': new BigNumber(1) });
 		});
@@ -438,12 +438,12 @@ contract('Marketplace', function ([owner, storeOwner, another]) {
 			const storeAddress = ownersStores[0];
 
 			const store = await DestructibleStore.at(storeAddress);
-			await store.addProduct(0x1, 1, 1000000);
-			await store.buy(0, 1, { from: another, value: 1000000 });
+			await store.addProduct.sendTransaction(0x1, 1, 1000000, { from: owner });
+			await store.buy.sendTransaction(0, 1, { from: another, value: 1000000 });
 
 			const marketplaceOldBalance = await web3.eth.getBalance(sut.address);
 			// Act
-			await sut.withdrawFromStore(storeAddress, 1);
+			await sut.withdrawFromStore.sendTransaction(storeAddress, 1, { from: owner });
 			// Assert
 			const marketplaceNewBalance = await web3.eth.getBalance(sut.address);
 
@@ -459,12 +459,12 @@ contract('Marketplace', function ([owner, storeOwner, another]) {
 			const storeAddress = ownersStores[0];
 
 			const store = await DestructibleStore.at(storeAddress);
-			await store.addProduct(0x1, 1, 1000000);
-			await store.buy(0, 1, { from: another, value: 1000000 });
+			await store.addProduct.sendTransaction(0x1, 1, 1000000, { from: owner });
+			await store.buy.sendTransaction(0, 1, { from: another, value: 1000000 });
 
 			const marketplaceOldBalance = await store.marketplaceBalance.call();
 			// Act
-			await sut.withdrawFromStore(storeAddress, 1);
+			await sut.withdrawFromStore.sendTransaction(storeAddress, 1, { from: owner });
 			// Assert
 			const marketplaceNewBalance = await store.marketplaceBalance.call();
 
