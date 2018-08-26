@@ -241,7 +241,7 @@ contract Store is MarketplaceStore {
 		nonEmptyRecipient(_recipient)
 		nonZeroAmount(_amount)
 	{
-		require(_amount <= address(this).balance, 'Your balance is not sufficient!');
+		require(_amount <= address(this).balance.sub(marketplaceBalance), 'Your balance is not sufficient!');
 
 		emit LogOwnerWithdrawal(_recipient, _amount);
 

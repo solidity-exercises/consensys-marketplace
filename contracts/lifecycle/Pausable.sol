@@ -24,16 +24,16 @@ contract Pausable is StoreOwnable {
 	/**
 	* @dev called by the owner to pause, triggers stopped state
 	*/
-	function pause() public onlyOwner whenNotPaused {
-		paused = true;
+	function pause() public onlyOwner {
 		emit Pause();
+		paused = true;
 	}
 
 	/**
 	* @dev called by the owner to unpause, returns to normal state
 	*/
 	function unpause() public onlyOwner {
-		paused = false;
 		emit Unpause();
+		paused = false;
 	}
 }
