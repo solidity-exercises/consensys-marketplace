@@ -12,6 +12,8 @@ interface IStoreManager {
 
 	function transferStoreOwnership (address _storeOwner, uint16 _storeIndex, address _newStoreOwner, uint16 _newOwnerStoreIndex) external;
 
+	function requestStore(bytes32 _proposal) external;
+
 	function approveStore(bool _isApproved, uint16 _indexInStoresArray) external;
 
 	function revokeStore(address _storeOwner, uint16 _storeIndex) external;
