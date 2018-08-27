@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ContractService } from '../../services/contract.service';
 import { Web3Service } from '../../services/web3.service';
-import { GlobalsService } from '../../services/globals.service';
 
 @Component({
-	selector: 'app-domain',
-	templateUrl: './domain.component.html',
-	styleUrls: ['./domain.component.css']
+	selector: 'app-admin',
+	templateUrl: './admin.component.html',
+	styleUrls: ['./admin.component.css']
 })
-export class DomainComponent implements OnInit {
+export class AdminComponent implements OnInit {
 
 	registration = {
 		domainName: '',

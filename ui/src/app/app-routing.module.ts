@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
-import { DomainComponent } from './components/domain/domain.component';
+import { AdminComponent } from './components/admin/admin.component';
 import { OwnerComponent } from './components/owner/owner.component';
-import { ReceiptsComponent } from './components/receipts/receipts.component';
+import { CustomerComponent } from './components/customer/customer.component';
 
 export const routes: Routes = [
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
 	{ path: 'home', component: HomeComponent },
-	{ path: 'domain', component: DomainComponent },
+	{ path: 'admin', component: AdminComponent },
 	{ path: 'owner', component: OwnerComponent },
-	{ path: 'receipts', component: ReceiptsComponent },
+	{ path: 'customer', component: CustomerComponent },
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
 	{ path: '**', redirectTo: 'home', pathMatch: 'full' }
 ];

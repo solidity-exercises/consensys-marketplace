@@ -4,11 +4,11 @@ import { Web3Service } from '../../services/web3.service';
 import { GlobalsService } from '../../services/globals.service';
 
 @Component({
-	selector: 'app-receipts',
-	templateUrl: './receipts.component.html',
-	styleUrls: ['./receipts.component.css']
+	selector: 'app-customer',
+	templateUrl: './customer.component.html',
+	styleUrls: ['./customer.component.css']
 })
-export class ReceiptsComponent implements OnInit {
+export class CustomerComponent implements OnInit {
 
 	isContractDestroyed = false;
 

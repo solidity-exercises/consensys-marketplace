@@ -11,8 +11,8 @@ import { NavbarComponent } from './shared/navbar/navbar.component';
 import { FooterComponent } from './shared/footer/footer.component';
 import { HomeComponent } from './components/home/home.component';
 import { OwnerComponent } from './components/owner/owner.component';
-import { DomainComponent } from './components/domain/domain.component';
-import { ReceiptsComponent } from './components/receipts/receipts.component';
+import { AdminComponent } from './components/admin/admin.component';
+import { CustomerComponent } from './components/customer/customer.component';
 import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
@@ -22,8 +22,8 @@ import { AppRoutingModule } from './app-routing.module';
 		FooterComponent,
 		HomeComponent,
 		OwnerComponent,
-		DomainComponent,
-		ReceiptsComponent
+		AdminComponent,
+		CustomerComponent
 	],
 	imports: [
 		BrowserModule,
