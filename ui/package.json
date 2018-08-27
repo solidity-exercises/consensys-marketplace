@@ -1,7 +1,7 @@
 {
-	"name": "smartcontractdevelopmentwithsoliditycourseproject",
-	"version": "1.0.0",
-	"description": "Course project for the Smart Contract Development with Solidity course.",
+	"name": "consensys-marketplace",
+	"version": "0.0.1",
+	"description": "ConsenSys Academy Course Project",
 	"main": "index.js",
 	"scripts": {
 		"ng": "ng",
@@ -13,14 +13,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/ArnaudovSt/SmartContractDevelopmentWithSolidityCourseProject.git"
+		"url": "git+https://github.com/solidity-exercises/consensys-marketplace.git"
 	},
 	"author": "Stefan Arnaudov",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/ArnaudovSt/SmartContractDevelopmentWithSolidityCourseProject/issues"
+		"url": "https://github.com/solidity-exercises/consensys-marketplace/issues"
 	},
-	"homepage": "https://github.com/ArnaudovSt/SmartContractDevelopmentWithSolidityCourseProject#readme",
+	"homepage": "https://github.com/solidity-exercises/consensys-marketplace#readme",
 	"dependencies": {
 		"@angular/animations": "^5.2.8",
 		"@angular/common": "^5.1.1",

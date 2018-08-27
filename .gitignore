@@ -67,3 +67,4 @@ package-lock.json
 .idea
 *.iml
 installed_contracts
+dist
