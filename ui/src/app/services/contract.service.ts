@@ -3,465 +3,656 @@ import { Web3Service } from './web3.service';
 import { Contract, TransactionReceipt } from 'web3/types';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
-import { GlobalsService } from './globals.service';
 
+const storeAbi = require("../../../store-abi.json")["store"];
 @Injectable()
 export class ContractService {
-	private _DDNSCore: Contract;
+	private _marketplace: Contract;
 
-	constructor(private _web3Service: Web3Service, private _toastr: ToastrService, private _globals: GlobalsService) { }
+	constructor(private _web3Service: Web3Service, private _toastr: ToastrService) {
+		this._initContract();
+	}
 
-	public async registerDomain(domainName: string, ipAddress: string, topLevelDomain: string
-	) {
+	public async isMarketplaceOwnerOperating(fromAccount) {
+		const owner = await this._marketplace.methods.owner().call();
+		return owner == fromAccount;
+	}
+
+	public async isStoreOwnerOperating(fromAccount) {
+		return this._marketplace.methods.isStoreOwner(fromAccount).call();
+	}
+
+	public async requestStore(proposal: string) {
 		await this._checkContract();
-
-		if (!this._isValidDomain(domainName, topLevelDomain)) {
-			this._toastr.error('The whole domain name is not correct! Please try again!');
-			return;
-		}
-
-		if (!this._isValidIp(ipAddress)) {
-			this._toastr.error('The ip address is not correct! Please try again!');
-			return;
-		}
-
-		const domainPrice = await this._getDomainPrice(domainName);
 
 		const from = await this._web3Service.getFromAccount();
 
-		return this._DDNSCore.methods
-			.registerDomain(this._web3Service.fromUtf8(domainName), this._web3Service.fromUtf8(ipAddress), this._web3Service.fromUtf8(topLevelDomain))
-			.send({ from: from, value: domainPrice })
+		const isOwner = await this.isMarketplaceOwnerOperating(from);
+
+		if (!isOwner) {
+			this._toastr.error(`${from} account is not marketplace owner!`);
+			return;
+		}
+
+		// TODO: process the proposal IPFS hash to hex and prepend it with 0x
+		const processed = proposal;
+
+		const gas = await this._marketplace.methods
+			.requestStore(processed)
+			.estimateGas({ from: from });
+
+		return this._marketplace.methods
+			.requestStore(processed)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`${domainName}.${topLevelDomain} registration transaction hash is ${hash}.`);
+				this._toastr.info(`Store request with proposal ${proposal} transaction hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully registered ${domainName}.${topLevelDomain} at ${ipAddress}!`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Store request transaction ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not register ${domainName}.${topLevelDomain} at ${ipAddress} due to revert!`);
+				this._toastr.error(`Could not request store with proposal ${proposal}`);
 				console.error(err);
 			});
 	}
 
-	public async renewDomainRegistration(domainName: string, topLevelDomain: string) {
+	public async approveStore(isApproved: boolean, indexInStoresArray) {
 		await this._checkContract();
-
-		const domainOwner = await this._getDomainOwner(domainName, topLevelDomain);
 
 		const from = await this._web3Service.getFromAccount();
 
-		if (domainOwner !== from) {
-			this._toastr.error(`You must be the owner of ${domainName}.${topLevelDomain} in order to renew the domain registration!`);
+		const isOwner = await this.isMarketplaceOwnerOperating(from);
+
+		if (!isOwner) {
+			this._toastr.error(`${from} account is not marketplace owner!`);
 			return;
 		}
 
-		const domainPrice = await this._getDomainPrice(domainName);
+		const gas = await this._marketplace.methods
+			.approveStore(isApproved, indexInStoresArray)
+			.estimateGas({ from: from });
 
-		return this._DDNSCore.methods
-			.renewDomainRegistration(this._web3Service.fromUtf8(domainName), this._web3Service.fromUtf8(topLevelDomain))
-			.send({ from: from, value: domainPrice })
+		return this._marketplace.methods
+			.approveStore(isApproved, indexInStoresArray)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`${domainName}.${topLevelDomain} renew transaction hash is ${hash}.`);
+				this._toastr.info(`Store approval transaction hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully registered ${domainName}.${topLevelDomain}!`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Store approval transaction ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not renew ${domainName}.${topLevelDomain} due to revert!`);
+				this._toastr.error(`Could not approve store!`);
 				console.error(err);
 			});
 	}
 
-	public async editDomainIp(domainName: string, topLevelDomain: string, newIpAddress: string) {
-		await this._checkContract();
+	public async revokeStore(ownerAddress: string, storeIndex) {
+		const owner = this._web3Service.getChecksumAddress(ownerAddress);
 
-		if (!this._isValidIp(newIpAddress)) {
-			this._toastr.error('The ip address is not correct! Please try again!');
+		if (!owner) {
+			this._toastr.error(`${ownerAddress} account is not valid!`);
 			return;
 		}
 
-		const domainOwner = await this._getDomainOwner(domainName, topLevelDomain);
+		await this._checkContract();
 
 		const from = await this._web3Service.getFromAccount();
 
-		if (domainOwner !== from) {
-			this._toastr.error(`You must be the owner of ${domainName}.${topLevelDomain} in order to edit the domain ip!`);
+		const isOwner = await this.isMarketplaceOwnerOperating(from);
+
+		if (!isOwner) {
+			this._toastr.error(`${from} account is not marketplace owner!`);
 			return;
 		}
 
-		return this._DDNSCore.methods
-			.editDomainIp(this._web3Service.fromUtf8(domainName), this._web3Service.fromUtf8(topLevelDomain), this._web3Service.fromUtf8(newIpAddress))
-			.send({ from: from })
+		const gas = await this._marketplace.methods
+			.revokeStore(owner, storeIndex)
+			.estimateGas({ from: from });
+
+		return this._marketplace.methods
+			.revokeStore(owner, storeIndex)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`${domainName}.${topLevelDomain} edit ip transaction hash is ${hash}.`);
+				this._toastr.info(`Store revocation from owner ${ownerAddress} transaction hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully edited ${domainName}.${topLevelDomain} ip! The new ip is ${newIpAddress}.`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Store revocation from owner ${ownerAddress} transaction ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not edit ${domainName}.${topLevelDomain}'s ip due to revert!`);
+				this._toastr.error(`Could not revoke store from owner ${ownerAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async transferOwnership(domainName: string, topLevelDomain: string, newOwnerAddress: string) {
+	public async getStoreOwners(): Promise<string[]> {
 		await this._checkContract();
 
-		const checksumAddress = this._web3Service.getChecksumAddress(newOwnerAddress);
-		if (!this._web3Service.isValidAddress(checksumAddress)) {
-			this._toastr.error('The provided new owner address is not valid! Please try again!');
+		return this._marketplace.methods.getStoreOwners().call();
+	}
+
+	public async getStoresByOwner(ownerAddress: string): Promise<string[]> {
+		await this._checkContract();
+
+		return this._marketplace.methods.getStoresByOwner(ownerAddress).call();
+	}
+
+	public async getStoreProducts(storeAddress, index) {
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
 			return;
 		}
 
-		const domainOwner = await this._getDomainOwner(domainName, topLevelDomain);
+		const storeContract = await this._getStoreContract(storeAddress);
 
+
+		return storeContract.methods.products.call(index).catch();
+	}
+
+	public async getStorefront(storeAddress, index) {
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		if (Number(index) > 15) {
+			this._toastr.error(`Storefront index out of range!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+
+		return storeContract.methods.storefront.call(index).catch();
+	}
+
+	public async setStorefront(storeAddress, storefrontIndex, productIndex) {
 		const from = await this._web3Service.getFromAccount();
 
-		if (domainOwner !== from) {
-			this._toastr.error(`You must be the owner of ${domainName}.${topLevelDomain} in order to transfer the domain ownership!`);
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
 			return;
 		}
 
-		return this._DDNSCore.methods
-			.transferOwnership(this._web3Service.fromUtf8(domainName), this._web3Service.fromUtf8(topLevelDomain), checksumAddress)
-			.send({ from: from })
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		if (Number(storefrontIndex) > 15) {
+			this._toastr.error(`Storefront index out of range!`);
+			return;
+		}
+
+		if (Number(productIndex) > 65535) {
+			this._toastr.error(`Product index out of range!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.setStorefront(storefrontIndex, productIndex)
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.setStorefront(storefrontIndex, productIndex)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`${domainName}.${topLevelDomain} ownership transfer transaction hash is ${hash}.`);
+				this._toastr.info(`Storefront setting transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully transferred ${domainName}.${topLevelDomain} ownership! The new ip is ${checksumAddress}.`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Storefront setting transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not transfer ${domainName}.${topLevelDomain} ownership due to revert!`);
+				this._toastr.error(`Could not set storefront for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async getReceiptReport(address: string, index: number) {
-		await this._checkContract();
-
-		const checksumAddress = this._web3Service.getChecksumAddress(address);
-		if (!this._web3Service.isValidAddress(checksumAddress)) {
-			this._toastr.error('The provided owner address is not valid! Please try again!');
-			return;
-		}
-
-		return this._DDNSCore.methods.receipts(checksumAddress, index).call().catch((err) => {});
-	}
-
-	public async getDomainDetails(domainName: string, topLevelDomain: string) {
-		await this._checkContract();
-
-		if (!this._isValidDomain(domainName, topLevelDomain)) {
-			this._toastr.error('The whole domain name is not correct! Please try again!');
-			return;
-		}
-
-		return this._getDomainDetails(domainName, topLevelDomain);
-	}
-
-	public async getDomainPriceInEther(domainName: string) {
-		await this._checkContract();
-
-		if (!this._isValidDomain(domainName)) {
-			this._toastr.error(`The domain name ${domainName} is not correct! Please try again!`);
-			return;
-		}
-
-		const domainPriceInWei = await this._getDomainPrice(domainName);
-		return this._web3Service.fromWei(domainPriceInWei);
-	}
-
-	public async getRegistrationCost(): Promise<string> {
-		await this._checkContract();
-
-		const registrationCost = await this._DDNSCore.methods.registrationCost().call();
-		return this._web3Service.fromWei(registrationCost);
-	}
-
-	public async getExpiryPeriodInDays(): Promise<string> {
-		await this._checkContract();
-
-		const expiryPeriod = Number(await this._DDNSCore.methods.expiryPeriod().call());
-		return (expiryPeriod / 86400).toString(10); // 86400 seconds in 24h
-	}
-
-	public async getWallet() {
-		await this._checkContract();
-
-		return this._DDNSCore.methods.wallet().call();
-	}
-
-	public async changeRegistrationCost(newPrice: (number | string)) {
-		await this._checkContract();
-
-		if (Number(newPrice) <= 0) {
-			this._toastr.error(`The price must be positive!`);
-			return;
-		}
-
+	public async addProduct(storeAddress, description: string, quantity, price) {
 		const from = await this._web3Service.getFromAccount();
 
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to change the registration cost!!`);
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
 			return;
 		}
 
-		const priceInWei = this._web3Service.toWei(newPrice);
+		const store = this._web3Service.getChecksumAddress(storeAddress);
 
-		return this._DDNSCore.methods
-			.changeRegistrationCost(priceInWei)
-			.send({ from: from })
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		if (description.length > 30 || description.length == 0) {
+			this._toastr.error(`Invalid product description length`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const bytesDescription = this._web3Service.fromUtf8(description);
+
+		const gas = await storeContract.methods
+			.addProduct(bytesDescription, quantity, price)
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.addProduct(bytesDescription, quantity, price)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Registration cost change transaction hash is ${hash}.`);
+				this._toastr.info(`Add product transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully changed registration cost! The new price is ${newPrice} ETH`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Add product transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not change registration cost to ${newPrice} due to revert!`);
+				this._toastr.error(`Could not add product for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async changeExpiryPeriodInDays(newPeriod: (number | string)) {
-		await this._checkContract();
-
-		newPeriod = Number(newPeriod);
-		if (newPeriod <= 7) {
-			this._toastr.error(`The period must be greater than 7 days!`);
-			return;
-		}
-
+	public async removeProduct(storeAddress, index) {
 		const from = await this._web3Service.getFromAccount();
 
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to change the expiry period!!`);
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
 			return;
 		}
 
-		const periodInSeconds = newPeriod * 86400;
+		if (Number(index) > 65535) {
+			this._toastr.error(`Product index out of range!`);
+			return;
+		}
 
-		return this._DDNSCore.methods
-			.changeExpiryPeriod(periodInSeconds)
-			.send({ from: from })
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.removeProduct(index)
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.removeProduct(index)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Expiry period change transaction hash is ${hash}.`);
+				this._toastr.info(`Remove product transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully changed expiry period! The new expiry period is ${newPeriod} days`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Remove product transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not change expiry period to ${newPeriod} due to revert!`);
+				this._toastr.error(`Could not remove product for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async changeWallet(newWalletAddress) {
-		await this._checkContract();
-
-		const checksumAddress = this._web3Service.getChecksumAddress(newWalletAddress);
-		if (!this._web3Service.isValidAddress(checksumAddress)) {
-			this._toastr.error('The provided new wallet address is not valid! Please try again!');
+	public async setPrice(storeAddress, index, newPrice) {
+		if (Number(index) > 65535) {
+			this._toastr.error(`Product index out of range!`);
 			return;
 		}
 
 		const from = await this._web3Service.getFromAccount();
 
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to change the wallet address!!`);
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
 			return;
 		}
 
-		return this._DDNSCore.methods
-			.changeWallet(checksumAddress)
-			.send({ from: from })
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.setPrice(index, newPrice)
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.setPrice(index, newPrice)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Wallet change transaction hash is ${hash}.`);
+				this._toastr.info(`Set price transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully changed wallet! The new wallet address is ${checksumAddress}.`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Set price transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not change wallet to ${checksumAddress} due to revert!`);
+				this._toastr.error(`Could not set price for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async withdrawEthers(amount: (string | number)) {
-		await this._checkContract();
-
-		const from = await this._web3Service.getFromAccount();
-
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to withdraw funds!!`);
+	public async increaseQuantity(storeAddress, index, increase) {
+		if (Number(index) > 65535) {
+			this._toastr.error(`Product index out of range!`);
 			return;
 		}
 
-		const amountInWei = this._web3Service.toWei(amount);
+		if (Number(increase) > 65535) {
+			this._toastr.error(`Increase out of range!`);
+			return;
+		}
 
-		return this._DDNSCore.methods
-			.withdraw(amountInWei)
-			.send({ from: from })
+		const from = await this._web3Service.getFromAccount();
+
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
+			return;
+		}
+
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.increaseQuantity(index, increase)
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.increaseQuantity(index, increase)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Withdraw transaction hash is ${hash}.`);
+				this._toastr.info(`Increase quantity transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully withdrew ${amount} ETH!`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Increase quantity transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not withdraw ${amount} ETH due to revert!`);
+				this._toastr.error(`Could not increase quantity for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async getOwner() {
-		await this._checkContract();
+	public async decreaseQuantity(storeAddress, index, decrease) {
+		if (Number(index) > 65535) {
+			this._toastr.error(`Product index out of range!`);
+			return;
+		}
 
-		return this._DDNSCore.methods.owner().call();
-	}
-
-	public async setOwner(newOwner) {
-		await this._checkContract();
-
-		const checksumAddress = this._web3Service.getChecksumAddress(newOwner);
-		if (!this._web3Service.isValidAddress(checksumAddress)) {
-			this._toastr.error('The provided new owner address is not valid! Please try again!');
+		if (Number(decrease) > 65535) {
+			this._toastr.error(`Decrease out of range!`);
 			return;
 		}
 
 		const from = await this._web3Service.getFromAccount();
 
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to set new owner!!`);
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
 			return;
 		}
 
-		return this._DDNSCore.methods
-			.setOwner(checksumAddress)
-			.send({ from: from })
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.decreaseQuantity(index, decrease)
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.decreaseQuantity(index, decrease)
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Owner setting transaction hash is ${hash}.`);
+				this._toastr.info(`Decrease quantity transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully set owner! The new owner address is ${checksumAddress}.`, `Transaction ${receipt.transactionHash} was mined.`);
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Decrease quantity transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not set owner to ${checksumAddress} due to revert!`);
+				this._toastr.error(`Could not decrease quantity for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async destroy() {
-		await this._checkContract();
-
+	public async pause(storeAddress) {
 		const from = await this._web3Service.getFromAccount();
 
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to destroy it!!`);
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
 			return;
 		}
 
-		return this._DDNSCore.methods
-			.destroy()
-			.send({ from: from })
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.pause()
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.pause()
+			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Contract destroying transaction hash is ${hash}.`);
+				this._toastr.info(`Pausing transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully destroyed the contract!`, `Transaction ${receipt.transactionHash} was mined.`);
-				this._globals.isContractDestroyed = true;
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Pausing transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not destroy contract due to revert!`);
+				this._toastr.error(`Could not pause for store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
-	public async destroyAndSend(recipient) {
-		await this._checkContract();
+	public async unpause(storeAddress) {
+		const from = await this._web3Service.getFromAccount();
 
-		const checksumAddress = this._web3Service.getChecksumAddress(recipient);
-		if (!this._web3Service.isValidAddress(checksumAddress)) {
-			this._toastr.error('The provided recipient address is not valid! Please try again!');
+		const isStoreOwner = await this.isStoreOwnerOperating(from);
+
+		if (!isStoreOwner) {
+			this._toastr.error(`${from} account is not store owner!`);
+			return;
+		}
+
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const currentStoreOwner = await storeContract.methods.owner().call;
+
+		if (from != currentStoreOwner) {
+			this._toastr.error(`Non-owner message sender!`);
+			return;
+		}
+
+		const gas = await storeContract.methods
+			.unpause()
+			.estimateGas({ from: from });
+
+		return storeContract.methods
+			.unpause()
+			.send({ from: from, gas: gas * 2 })
+			.on('transactionHash', (hash: string) => {
+				this._toastr.info(`Unpausing transaction for store ${storeAddress} hash is ${hash}.`);
+			})
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Unpausing transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
+			})
+			.on('error', (err: string) => {
+				this._toastr.error(`Could not unpause for store ${storeAddress}!`);
+				console.error(err);
+			});
+	}
+
+	public async buy(storeAddress, value, index, quantity) {
+		if (Number(index) > 65535) {
+			this._toastr.error(`Product index out of range!`);
+			return;
+		}
+
+		if (!!quantity && Number(quantity) > 65535) {
+			this._toastr.error(`Quantity out of range!`);
 			return;
 		}
 
 		const from = await this._web3Service.getFromAccount();
 
-		const isOwnerOperating = await this._isOwnerOperating(from);
-		if (!isOwnerOperating) {
-			this._toastr.error(`You must be the owner of the DDNS contract in order to destroy the contract and send it's funds!!`);
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
 			return;
 		}
 
-		return this._DDNSCore.methods
-			.destroyAndSend(checksumAddress)
-			.send({ from: from })
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		const gas = await storeContract.methods
+			.buy(index, quantity)
+			.estimateGas({ from: from, value: value });
+
+		return storeContract.methods
+			.buy(index, quantity)
+			.send({ from: from, value: value, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Contract destroying and fund sending transaction hash is ${hash}.`);
+				this._toastr.info(`Buy transaction for store ${storeAddress} hash is ${hash}.`);
 			})
-			.on('receipt', (receipt: TransactionReceipt) => {
-				this._toastr.success(`Successfully destroyed contract! All funds are sent to ${checksumAddress}.`, `Transaction ${receipt.transactionHash} was mined.`);
-				this._globals.isContractDestroyed = true;
+			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
+				if (confirmationNumber === 12) {
+					this._toastr.success(`Buy transaction for store ${storeAddress} ${receipt.transactionHash} has reached 12 confirmations!`);
+				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not destroy contract and send funds to ${checksumAddress} due to revert!`);
+				this._toastr.error(`Could not buy from store ${storeAddress}!`);
 				console.error(err);
 			});
 	}
 
 	private async _initContract() {
-		this._DDNSCore = await this._web3Service.getContract(environment.ABI, environment.address);
+		this._marketplace = await this._web3Service.getContract(environment.Abi, environment.address);
 	}
 
 	private async _checkContract() {
-		if (!this._DDNSCore && !this._globals.isContractDestroyed) {
+		if (!this._marketplace) {
 			await this._initContract();
 		}
 	}
 
-	private _isValidDomain(domainName: string, topLevelDomain = 'com') {
-		const pattern = /(?=^.{9,65}$)(^(?!:\/\/)([a-zA-Z0-9-_]{6,32}\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,32}?$)/gim;
-		const matchesPattern = (`${domainName}.${topLevelDomain}`).match(pattern);
-		const validDomainNameLength = domainName.length > 5;
-		const validTopLevelDomainLength = topLevelDomain.length > 1;
-		return (matchesPattern && validDomainNameLength && validTopLevelDomainLength);
-	}
-
-	private _isValidIp(ip: string) {
-		const pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-		const matchesPattern = ip.match(pattern);
-		const validIpLength = ip.length > 6;
-		return (matchesPattern && validIpLength);
-	}
-
-	private async _getDomainPrice(domainName: string) {
-		return this._DDNSCore.methods.getDomainPrice(this._web3Service.fromUtf8(domainName)).call();
-	}
-
-	private async _getDomainKey(domainName: string, topLevelDomain: string) {
-		return this._DDNSCore.methods.getDomainKey(this._web3Service.fromUtf8(domainName), this._web3Service.fromUtf8(topLevelDomain)).call();
-	}
-
-	private async _getDomainDetails(domainName: string, topLevelDomain: string) {
-		const key = await this._getDomainKey(domainName, topLevelDomain);
-		return this._DDNSCore.methods.domains(key).call();
-	}
-
-	private async _getDomainOwner(domainName: string, topLevelDomain: string) {
-		return (await this._getDomainDetails(domainName, topLevelDomain))[3];
-	}
-
-	private async _isOwnerOperating(fromAccount) {
-		const contractOwner = await this.getOwner();
-		return contractOwner === fromAccount;
+	private async _getStoreContract(address): Promise<Contract> {
+		return this._web3Service.getContract(storeAbi['abi'], address);
 	}
 }
