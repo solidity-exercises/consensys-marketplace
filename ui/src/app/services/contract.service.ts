@@ -3,14 +3,19 @@ import { Web3Service } from './web3.service';
 import { Contract, TransactionReceipt } from 'web3/types';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
+import { IpfsService } from './ipfs.service';
 
 const storeAbi = require("../../../store-abi.json")["store"];
 @Injectable()
 export class ContractService {
 	private _marketplace: Contract;
 
-	constructor(private _web3Service: Web3Service, private _toastr: ToastrService) {
+	constructor(private _web3Service: Web3Service, private _ipfsService: IpfsService, private _toastr: ToastrService) {
 		this._initContract();
+	}
+
+	public async getMarketplaceOwner() {
+		return await this._marketplace.methods.owner().call();
 	}
 
 	public async isMarketplaceOwnerOperating(fromAccount) {
@@ -34,8 +39,7 @@ export class ContractService {
 			return;
 		}
 
-		// TODO: process the proposal IPFS hash to hex and prepend it with 0x
-		const processed = proposal;
+		const processed = await this._ipfsService.add(proposal);
 
 		const gas = await this._marketplace.methods
 			.requestStore(processed)
@@ -642,6 +646,16 @@ export class ContractService {
 			});
 	}
 
+	public async getNextStoreRequest() {
+		const index = await this._getNextRequestIndex();
+
+		const request = this._marketplace.methods.storeRequests(index).call();
+
+		const processed = this._ipfsService.getIpfsHashFromBytes32(request[0]);
+
+		return [processed, request[1]];
+	}
+
 	private async _initContract() {
 		this._marketplace = await this._web3Service.getContract(environment.Abi, environment.address);
 	}
@@ -654,5 +668,9 @@ export class ContractService {
 
 	private async _getStoreContract(address): Promise<Contract> {
 		return this._web3Service.getContract(storeAbi['abi'], address);
+	}
+
+	private async _getNextRequestIndex() {
+		return this._marketplace.methods.nextRequestIndex().call();
 	}
 }
