@@ -20,6 +20,6 @@ export class HomeComponent implements OnInit {
 	}
 
 	private async _getContractInfo() {
-		this.contractInfo.owner = await this._contractService.getMarketplaceOwner()
+		this.contractInfo.owner = await this._contractService.getMarketplaceOwner();
 	}
 }

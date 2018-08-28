@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 import { IpfsService } from './ipfs.service';
 
-const storeAbi = require("../../../store-abi.json")["store"];
+const storeAbi = require('../../../store-abi.json')['store'];
 @Injectable()
 export class ContractService {
 	private _marketplace: Contract;
@@ -20,14 +20,14 @@ export class ContractService {
 
 	public async isMarketplaceOwnerOperating(fromAccount) {
 		const owner = await this._marketplace.methods.owner().call();
-		return owner == fromAccount;
+		return owner === fromAccount;
 	}
 
 	public async isStoreOwnerOperating(fromAccount) {
 		return this._marketplace.methods.isStoreOwner(fromAccount).call();
 	}
 
-	public async requestStore(proposal: string) {
+	public async requestStore(proposal) {
 		await this._checkContract();
 
 		const from = await this._web3Service.getFromAccount();
@@ -49,7 +49,7 @@ export class ContractService {
 			.requestStore(processed)
 			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
-				this._toastr.info(`Store request with proposal ${proposal} transaction hash is ${hash}.`);
+				this._toastr.info(`Store request with proposal ${processed} transaction hash is ${hash}.`);
 			})
 			.on('confirmation', (confirmationNumber: number, receipt: TransactionReceipt) => {
 				if (confirmationNumber === 12) {
@@ -57,7 +57,7 @@ export class ContractService {
 				}
 			})
 			.on('error', (err: string) => {
-				this._toastr.error(`Could not request store with proposal ${proposal}`);
+				this._toastr.error(`Could not request store with proposal ${processed}`);
 				console.error(err);
 			});
 	}
@@ -79,7 +79,7 @@ export class ContractService {
 			.estimateGas({ from: from });
 
 		return this._marketplace.methods
-			.approveStore(isApproved, indexInStoresArray)
+			.approveStore(isApproved, Number(indexInStoresArray))
 			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
 				this._toastr.info(`Store approval transaction hash is ${hash}.`);
@@ -209,9 +209,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -254,16 +254,16 @@ export class ContractService {
 			return;
 		}
 
-		if (description.length > 30 || description.length == 0) {
+		if (description.length > 30 || description.length === 0) {
 			this._toastr.error(`Invalid product description length`);
 			return;
 		}
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -315,9 +315,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -367,9 +367,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -424,9 +424,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -481,9 +481,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -528,9 +528,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -575,9 +575,9 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-		const currentStoreOwner = await storeContract.methods.owner().call;
+		const currentStoreOwner = await storeContract.methods.owner().call();
 
-		if (from != currentStoreOwner) {
+		if (from !== currentStoreOwner) {
 			this._toastr.error(`Non-owner message sender!`);
 			return;
 		}
@@ -649,7 +649,7 @@ export class ContractService {
 	public async getNextStoreRequest() {
 		const index = await this._getNextRequestIndex();
 
-		const request = this._marketplace.methods.storeRequests(index).call();
+		const request = await this._marketplace.methods.storeRequests(index).call();
 
 		const processed = this._ipfsService.getIpfsHashFromBytes32(request[0]);
 
@@ -667,7 +667,7 @@ export class ContractService {
 	}
 
 	private async _getStoreContract(address): Promise<Contract> {
-		return this._web3Service.getContract(storeAbi['abi'], address);
+		return this._web3Service.getContract(storeAbi, address);
 	}
 
 	private async _getNextRequestIndex() {

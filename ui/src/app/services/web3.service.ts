@@ -39,7 +39,11 @@ export class Web3Service {
 			return this._web3.utils.toChecksumAddress(address);
 		}
 
-		return '';
+		if (!this.isValidAddress(address)) {
+			return '';
+		}
+
+		return address;
 	}
 
 	public fromWei(amount: (number | string)) {
