@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ContractService } from '../../services/contract.service';
 import { Web3Service } from '../../services/web3.service';
-import { GlobalsService } from '../../services/globals.service';
 
 @Component({
 	selector: 'app-customer',
@@ -10,42 +9,55 @@ import { GlobalsService } from '../../services/globals.service';
 })
 export class CustomerComponent implements OnInit {
 
-	isContractDestroyed = false;
+	customer = '';
 
-	report = {
-		owner: '',
-		receipts: []
-	};
+	owners = [];
 
-	constructor(private _contractService: ContractService, private _web3Service: Web3Service, private _globals: GlobalsService) { }
+	constructor(private _contractService: ContractService, private _web3Service: Web3Service) { }
 
 	ngOnInit() {
-		this._checkContract();
-		this._fillReportOwner();
+		this._fillData();
+		this._getFromAccount();
 	}
 
-	public async getReceiptsReport() {
-		this.report.receipts = [];
-		let index = 0;
-		while (true) {
-			const currentReceipt = await this._contractService.getReceiptReport(this.report.owner, index);
-
-			if (!currentReceipt) {
-				break;
-			}
-			currentReceipt.domainName = this._web3Service.toUtf8(currentReceipt.domainName);
-			currentReceipt.amountPaid = this._web3Service.fromWei(currentReceipt.amountPaid);
-			currentReceipt.timeBought += '000';
-			this.report.receipts.push(currentReceipt);
-			index++;
-		}
+	public async captureFile(event) {
+		event.stopPropagation();
+		event.preventDefault();
+		const file = event.target.files[0];
+		const reader = new FileReader();
+		reader.onloadend = () => this._requestStore(reader.result);
+		reader.readAsArrayBuffer(file);
 	}
 
-	private async _checkContract() {
-		this.isContractDestroyed = this._globals.isContractDestroyed;
+	public handleSubmit(event) {
+		event.preventDefault();
 	}
 
-	private async _fillReportOwner() {
-		this.report.owner = await this._web3Service.getFromAccount();
+	private async _requestStore(reader) {
+		this._contractService.requestStore(reader);
+	}
+
+	private async _getFromAccount() {
+		this.customer = await this._web3Service.getFromAccount();
+	}
+
+	private async _fillData() {
+		const owners = await this._contractService.getStoreOwners();
+
+		const promises = [];
+
+		owners.forEach((owner) => {
+			promises.push(
+				this._contractService
+					.getStoresByOwner(owner)
+					.then((stores) => {
+						this.owners.push({
+							address: owner,
+							stores: stores
+						});
+					}));
+		});
+
+		return Promise.all(promises);
 	}
 }

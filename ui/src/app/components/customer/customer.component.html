@@ -1,29 +1,49 @@
-<h1 class="display-6 text-center" *ngIf='isContractDestroyed'>Current Contract instance has been
-	<b>Destroyed!</b>
-</h1>
-<div class="jumbotron jumbotron-fluid" *ngIf='!isContractDestroyed'>
+<div class="jumbotron jumbotron-fluid">
 	<div class="container text-center">
-		<h1 class="display-3">Receipts Report</h1>
-		<form>
-			<div class="form-group">
-				<label>Owner Address
-					<input type="text" name="owner-address" class="form-control" aria-describedby="ownerAddress" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
-					 required [(ngModel)]='report.owner'>
-				</label>
-			</div>
-			<button type="button" class="btn btn-outline-dark" (click)="getReceiptsReport()">Get Report</button>
-		</form>
-		<div class="row">
-			<div class="col-md-6" *ngFor='let receipt of report.receipts'>
-				<div class="card">
-					<div class="card-header">
-						Receipt
+		<h1 class="display-3">Store Catalogue</h1>
+		<div id="accordion">
+			<form>
+				<div class="form-group">
+					<div class="card text-center">
+						<div class="card-header" id="headingOne">
+							<h5 class="mb-0">
+								<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne"
+								 (click)='_getFromAccount()'>
+									Add Your Store Request
+								</button>
+							</h5>
+						</div>
+
+						<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+							<div class="card-body">
+								<h5 class="card-title">Store Request</h5>
+								<form>
+									<div class="form-group">
+										<p>Sender Address: {{customer}}</p>
+										<form id='captureMedia' class="form-group" (submit)="handleSubmit($event)">
+											<p>
+												Add Your Request Proposal</p>
+											<input type='file' (change)="captureFile($event)" class="btn btn-outline-dark btn-block" />
+										</form>
+									</div>
+
+								</form>
+							</div>
+						</div>
 					</div>
-					<ul class="list-group list-group-flush">
-						<li class="list-group-item">Domain Name: {{receipt.domainName}}</li>
-						<li class="list-group-item">Amount Paid: {{receipt.amountPaid}} ETH</li>
-						<li class="list-group-item">Date of Purchase: {{receipt.timeBought | date:'full'}}</li>
-					</ul>
+				</div>
+			</form>
+			<div class="row">
+				<div class="col-md-6" *ngFor='let owner of owners'>
+					<div class="card">
+						<div class="card-header">
+							Store Owner: {{owner.address}}
+						</div>
+						<ul class="list-group list-group-flush" *ngFor='let store of owner.stores'>
+							<a class="list-group-item badge btn-outline-dark" *ngIf='store!=0x0000000000000000000000000000000000000000' [routerLink]="[ '/store/', store ]"><span>
+									{{store}}</span></a>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>
