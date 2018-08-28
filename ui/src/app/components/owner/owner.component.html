@@ -37,7 +37,7 @@
 								<input type="text" name="productQuantity" class="form-control" aria-describedby="productQuantity" placeholder="42" required
 								 [(ngModel)]='add.quantity'>
 							</label>
-							<label>Price
+							<label>Price (WEI)
 								<input type="text" name="productPrice" class="form-control" aria-describedby="productPrice" placeholder="42" required [(ngModel)]='add.price'>
 							</label>
 						</div>
@@ -96,8 +96,8 @@
 							<label>Product Index
 								<input type="text" name="index" class="form-control" aria-describedby="index" placeholder="42" required [(ngModel)]='price.index'>
 							</label>
-							<label>New Price
-								<input type="text" name="price" class="form-control" aria-describedby="price" placeholder="0.1(ETH)"
+							<label>New Price (WEI)
+								<input type="text" name="price" class="form-control" aria-describedby="price" placeholder="1000 WEI"
 								 required [(ngModel)]='price.price'>
 							</label>
 						</div>

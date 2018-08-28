@@ -63,7 +63,7 @@ export class OwnerComponent implements OnInit {
 	}
 
 	public async addProduct() {
-		this._contractService.addProduct(this.add.address, this._web3Service.fromUtf8(this.add.description), this.add.quantity, this.add.price)
+		this._contractService.addProduct(this.add.address, this.add.description, this.add.quantity, this.add.price)
 			.then(() => {
 				this.add.address = '',
 					this.add.description = '',
@@ -81,7 +81,7 @@ export class OwnerComponent implements OnInit {
 	}
 
 	public async updatePrice() {
-		this._contractService.setPrice(this.price.address, this.price.index, this._web3Service.toWei(this.price.price))
+		this._contractService.setPrice(this.price.address, this.price.index, this.price.price)
 			.then(() => {
 				this.price.address = '';
 				this.price.index = '';
@@ -124,7 +124,7 @@ export class OwnerComponent implements OnInit {
 	}
 
 	public async unpause() {
-		this._contractService.pause(this.u.address)
+		this._contractService.unpause(this.u.address)
 			.then(() => {
 				this.u.address = '';
 			});
