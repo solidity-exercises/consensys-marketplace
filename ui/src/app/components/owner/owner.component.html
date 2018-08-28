@@ -1,15 +1,12 @@
-<h1 class="display-6 text-center" *ngIf='isContractDestroyed'>Current Contract instance has been
-	<b>Destroyed!</b>
-</h1>
-<div class="jumbotron jumbotron-fluid" *ngIf='!isContractDestroyed'>
+<div class="jumbotron jumbotron-fluid">
 	<div class="container text-center">
 		<h1 class="display-6">Owner Operations</h1>
 		<blockquote class="blockquote">
-			<p class="lead mb-0">
-				<b>Contract Owner: </b>{{contractInfo.owner}}</p>
-			<p class="lead mb-0">
-				<b>Contract Wallet: </b>{{contractInfo.wallet}}</p>
-			<footer class="blockquote-footer">You must be the contract owner in order to perform this operations.
+			<h4 class="display-6">Stores owned by {{owner}}
+			</h4>
+			<p class="lead mb-0" *ngFor='let store of stores'>
+				<span *ngIf='store!=0x0000000000000000000000000000000000000000'><b>Store: </b>{{store}}</span></p>
+			<footer class="blockquote-footer">You must be the store owner in order to perform this operations.
 			</footer>
 		</blockquote>
 	</div>
@@ -18,22 +15,33 @@
 			<div class="card-header" id="headingOne">
 				<h5 class="mb-0">
 					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-						Change Registration Cost
+						Add Product
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">Registration Cost</h5>
+					<h5 class="card-title">Product</h5>
 					<form>
 						<div class="form-group">
-							<label>New Registration Cost (ETH)
-								<input type="text" name="registration-cost" class="form-control" aria-describedby="registrationCost" placeholder="3.14(ETH)"
-								 required [(ngModel)]='newRegistrationCost'>
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='add.address'>
+							</label>
+							<label>Description
+								<input type="text" name="productDescription" class="form-control" aria-describedby="productDescription" placeholder="Sample Description"
+								 required [(ngModel)]='add.description'>
+							</label>
+							<label>Quantity
+								<input type="text" name="productQuantity" class="form-control" aria-describedby="productQuantity" placeholder="42" required
+								 [(ngModel)]='add.quantity'>
+							</label>
+							<label>Price
+								<input type="text" name="productPrice" class="form-control" aria-describedby="productPrice" placeholder="42" required [(ngModel)]='add.price'>
 							</label>
 						</div>
-						<button type="button" class="btn btn-outline-dark" (click)="changeRegistrationCost()">Change Cost</button>
+						<button type="button" class="btn btn-outline-dark" (click)="addProduct()">Add </button>
 					</form>
 				</div>
 			</div>
@@ -42,22 +50,25 @@
 			<div class="card-header" id="headingTwo">
 				<h5 class="mb-0">
 					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-						Change Expiry Period
+						Remove Product
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">Expiry Period</h5>
+					<h5 class="card-title">Product</h5>
 					<form>
 						<div class="form-group">
-							<label>New Expiry Period (days)
-								<input type="text" name="expiry-period" class="form-control" aria-describedby="expiryPeriod" placeholder="42(days)" required
-								 [(ngModel)]='newExpiryPeriod'>
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='remove.address'>
+							</label>
+							<label>Product Index
+								<input type="text" name="index" class="form-control" aria-describedby="index" placeholder="42" required [(ngModel)]='remove.index'>
 							</label>
 						</div>
-						<button type="button" class="btn btn-outline-dark" (click)="changeExpiryPeriod()">Change Period</button>
+						<button type="button" class="btn btn-outline-dark" (click)="removeProduct()">Remove</button>
 					</form>
 				</div>
 			</div>
@@ -66,23 +77,31 @@
 		<div class="card text-center">
 			<div class="card-header" id="headingThree">
 				<h5 class="mb-0">
-					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-						Change Wallet Address
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false"
+					 aria-controls="collapseThree">
+						Set Price of Product
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">Change Wallet</h5>
+					<h5 class="card-title">Set Price</h5>
 					<form>
 						<div class="form-group">
-							<label>New Wallet Address
-								<input type="text" name="new-wallet" class="form-control" aria-describedby="newWallet" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
-								 required [(ngModel)]='newWallet'>
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='price.address'>
+							</label>
+							<label>Product Index
+								<input type="text" name="index" class="form-control" aria-describedby="index" placeholder="42" required [(ngModel)]='price.index'>
+							</label>
+							<label>New Price
+								<input type="text" name="price" class="form-control" aria-describedby="price" placeholder="0.1(ETH)"
+								 required [(ngModel)]='price.price'>
 							</label>
 						</div>
-						<button type="button" class="btn btn-outline-dark" (click)="changeWallet()">Change Wallet</button>
+						<button type="button" class="btn btn-outline-dark" (click)="updatePrice()">Set Price</button>
 					</form>
 				</div>
 			</div>
@@ -92,22 +111,29 @@
 			<div class="card-header" id="headingFour">
 				<h5 class="mb-0">
 					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-						Withdraw
+						Increase Product Quantity
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">Withdrawal Details</h5>
+					<h5 class="card-title">Increase Quantity</h5>
 					<form>
 						<div class="form-group">
-							<label>Withdraw Amount (ETH)
-								<input type="text" name="withdraw-amount" class="form-control" aria-describedby="withdrawAmount" placeholder="42(ETH)" required
-								 [(ngModel)]='withdrawAmount'>
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='increase.address'>
+							</label>
+							<label>Product Index
+								<input type="text" name="index" class="form-control" aria-describedby="index" placeholder="42" required [(ngModel)]='increase.index'>
+							</label>
+							<label>Quantity
+								<input type="text" name="increase" class="form-control" aria-describedby="increase" placeholder="42"
+								 required [(ngModel)]='increase.increase'>
 							</label>
 						</div>
-						<button type="button" class="btn btn-outline-dark" (click)="withdrawEthers()">Withdraw</button>
+						<button type="button" class="btn btn-outline-dark" (click)="increaseQuantity()">Increase</button>
 					</form>
 				</div>
 			</div>
@@ -117,65 +143,111 @@
 			<div class="card-header" id="headingFive">
 				<h5 class="mb-0">
 					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-						Set New Owner
+						Decrease Product Quantity
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">New Owner Details</h5>
+					<h5 class="card-title">Decrease Quantity</h5>
 					<form>
 						<div class="form-group">
-							<label>New Owner Address
-								<input type="text" name="new-owner-address" class="form-control" aria-describedby="newOwnerAddress" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
-								 required [(ngModel)]='newOwner'>
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='decrease.address'>
+							</label>
+							<label>Product Index
+								<input type="text" name="index" class="form-control" aria-describedby="index" placeholder="42" required [(ngModel)]='decrease.index'>
+							</label>
+							<label>Quantity
+								<input type="text" name="decrease" class="form-control" aria-describedby="decrease" placeholder="42"
+								 required [(ngModel)]='decrease.decrease'>
 							</label>
 						</div>
-						<button type="button" class="btn btn-outline-danger" (click)="setNewOwner()">Set New Owner</button>
+						<button type="button" class="btn btn-outline-dark" (click)="decreaseQuantity()">Decrease</button>
 					</form>
 				</div>
 			</div>
 		</div>
+
 		<div class="card text-center">
 			<div class="card-header" id="headingSix">
 				<h5 class="mb-0">
 					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
-						Destroy Contract
+						Set Product in Storefront
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">Destroy Contract</h5>
-					<button type="button" class="btn btn-outline-danger" (click)="destroy()">Destroy!</button>
+					<h5 class="card-title">Set Storefront</h5>
+					<form>
+						<div class="form-group">
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='storefront.address'>
+							</label>
+							<label>Index in the Storefront
+								<input type="text" name="index" class="form-control" aria-describedby="index" placeholder="0" required [(ngModel)]='storefront.index'>
+							</label>
+							<label>Product Index
+								<input type="text" name="product-index" class="form-control" aria-describedby="product-index" placeholder="42" required [(ngModel)]='storefront.productIndex'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="setStorefront()">Set</button>
+					</form>
 				</div>
 			</div>
 		</div>
+
 		<div class="card text-center">
 			<div class="card-header" id="headingSeven">
 				<h5 class="mb-0">
-					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
-						Destroy Contract And Send Funds
+					<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseSeven" aria-expanded="false"
+					 aria-controls="collapseSeven">
+						Pause Store
 					</button>
 				</h5>
 			</div>
 
 			<div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordion">
 				<div class="card-body">
-					<h5 class="card-title">Recipient Details</h5>
-					<form>
-						<div class="form-group">
-							<label>Recipient Address
-								<input type="text" name="recipient-address" class="form-control" aria-describedby="recipientAddress" placeholder="0xc3376f273Fccce3d0c6b639D43400ad5400Ef3Ad"
-								 required [(ngModel)]='recipient'>
-							</label>
-							<button type="button" class="btn btn-outline-danger" (click)="destroyAndSend()">Destroy and Send!</button>
-						</div>
-					</form>
+					<h5 class="card-title">Pause Store</h5>
+					<div class="form-group">
+						<label>Store Address
+							<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+							 required [(ngModel)]='p.address'>
+						</label>
+					</div>
+					<button type="button" class="btn btn-outline-danger" (click)="pause()">Pause!</button>
 				</div>
 			</div>
 		</div>
+
+		<div class="card text-center">
+				<div class="card-header" id="headingEight">
+					<h5 class="mb-0">
+						<button class="btn btn-outline-dark btn-block" data-toggle="collapse" data-target="#collapseEight" aria-expanded="false"
+						 aria-controls="collapseEight">
+							Unpause Store
+						</button>
+					</h5>
+				</div>
+	
+				<div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#accordion">
+					<div class="card-body">
+						<h5 class="card-title">Unpause Store</h5>
+						<div class="form-group">
+							<label>Store Address
+								<input type="text" name="storeAddress" class="form-control" aria-describedby="storeAddress" placeholder="0xf8A39d6d4476D76caAA60f490536b6DE7431485B"
+								 required [(ngModel)]='u.address'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="unpause()">Unpause!</button>
+					</div>
+				</div>
+			</div>
 	</div>
 </div>

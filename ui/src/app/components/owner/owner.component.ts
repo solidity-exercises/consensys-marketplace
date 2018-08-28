@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ContractService } from '../../services/contract.service';
-import { GlobalsService } from '../../services/globals.service';
+import { Web3Service } from '../../services/web3.service';
 
 @Component({
 	selector: 'app-owner',
@@ -8,82 +8,131 @@ import { GlobalsService } from '../../services/globals.service';
 	styleUrls: ['./owner.component.css']
 })
 export class OwnerComponent implements OnInit {
-	contractInfo = {
-		wallet: '',
-		owner: ''
+
+	constructor(private _contractService: ContractService, private _web3Service: Web3Service) { }
+
+	add = {
+		address: '',
+		description: '',
+		quantity: '',
+		price: ''
 	};
 
-	newRegistrationCost = '';
+	remove = {
+		address: '',
+		index: ''
+	};
 
-	newExpiryPeriod = '';
+	price = {
+		address: '',
+		index: '',
+		price: ''
+	};
 
-	newWallet = '';
+	increase = {
+		address: '',
+		index: '',
+		increase: ''
+	};
 
-	withdrawAmount = '';
+	decrease = {
+		address: '',
+		index: '',
+		decrease: ''
+	};
 
-	newOwner = '';
+	storefront = {
+		address: '',
+		index: '',
+		productIndex: ''
+	};
 
-	recipient = '';
+	p = {
+		address: '',
+	};
 
-	isContractDestroyed = false;
+	u = {
+		address: '',
+	};
 
-	constructor(private _contractService: ContractService, private _globals: GlobalsService) { }
+	owner;
+	stores = [];
 
 	ngOnInit() {
-		this._getContractInfo();
+		this._getStoresByOwner();
 	}
 
-	public async changeRegistrationCost() {
-		await this._contractService.changeRegistrationCost(this.newRegistrationCost);
-		this.newRegistrationCost = '';
+	public async addProduct() {
+		this._contractService.addProduct(this.add.address, this._web3Service.fromUtf8(this.add.description), this.add.quantity, this.add.price)
+			.then(() => {
+				this.add.address = '',
+					this.add.description = '',
+					this.add.quantity = '',
+					this.add.price = '';
+			});
 	}
 
-	public async changeExpiryPeriod() {
-		await this._contractService.changeExpiryPeriodInDays(this.newExpiryPeriod);
-		this.newExpiryPeriod = '';
+	public async removeProduct() {
+		this._contractService.removeProduct(this.remove.address, this.remove.index)
+			.then(() => {
+				this.remove.address = '';
+				this.remove.index = '';
+			});
 	}
 
-	public async changeWallet() {
-		await this._contractService.changeWallet(this.newWallet);
-		this.newWallet = '';
-		await this._getContractInfo();
+	public async updatePrice() {
+		this._contractService.setPrice(this.price.address, this.price.index, this._web3Service.toWei(this.price.price))
+			.then(() => {
+				this.price.address = '';
+				this.price.index = '';
+				this.price.price = '';
+			});
 	}
 
-	public async withdrawEthers() {
-		await this._contractService.withdrawEthers(this.withdrawAmount);
-		this.withdrawAmount = '';
+	public async increaseQuantity() {
+		this._contractService.increaseQuantity(this.increase.address, this.increase.index, this.increase.increase)
+			.then(() => {
+				this.increase.address = '';
+				this.increase.index = '';
+				this.increase.increase = '';
+			});
 	}
 
-	public async setNewOwner() {
-		await this._contractService.setOwner(this.newOwner);
-		this.newOwner = '';
-		await this._getContractInfo();
+	public async decreaseQuantity() {
+		this._contractService.decreaseQuantity(this.decrease.address, this.decrease.index, this.decrease.decrease)
+			.then(() => {
+				this.decrease.address = '';
+				this.decrease.index = '';
+				this.decrease.decrease = '';
+			});
 	}
 
-	public async destroy() {
-		await this._contractService.destroy();
-		await this._getContractInfo();
+	public async setStorefront() {
+		this._contractService.setStorefront(this.storefront.address, this.storefront.index, this.storefront.productIndex)
+			.then(() => {
+				this.storefront.address = '';
+				this.storefront.index = '';
+				this.storefront.productIndex = '';
+			});
 	}
 
-	public async destroyAndSend() {
-		await this._contractService.destroyAndSend(this.recipient);
-		this.recipient = '';
-		await this._getContractInfo();
+	public async pause() {
+		this._contractService.pause(this.p.address)
+			.then(() => {
+				this.p.address = '';
+			});
 	}
 
-	private async _getContractInfo() {
-		this.isContractDestroyed = this._globals.isContractDestroyed;
-		if (!this.isContractDestroyed) {
-			const oldWallet = this.contractInfo.wallet;
-			const oldOwner = this.contractInfo.owner;
-			this.contractInfo.wallet = await this._contractService.getWallet();
-			this.contractInfo.owner = await this._contractService.getOwner();
-
-			if (oldWallet === this.contractInfo.wallet && oldOwner === this.contractInfo.owner) {
-				const delay = new Promise(resolve => setTimeout(resolve, 500));
-				await delay;
-				await this._getContractInfo();
-			}
-		}
+	public async unpause() {
+		this._contractService.pause(this.u.address)
+			.then(() => {
+				this.u.address = '';
+			});
 	}
+
+	private async _getStoresByOwner() {
+		this.owner = await this._web3Service.getFromAccount();
+		this.stores = await this._contractService.getStoresByOwner(this.owner);
+	}
+
 }
