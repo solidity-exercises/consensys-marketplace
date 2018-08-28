@@ -35,9 +35,9 @@ export class StoreComponent implements OnInit {
 	public async getProductAtNextIndex() {
 		const product = await this._contractService.getProductAtIndex(this.id, ++this.product.index).catch(() => {
 			--this.product.index;
-		});;
+		});
 
-		if (product && product.description !== "0x000000000000000000000000000000000000000000000000000000000000") {
+		if (product && product.description !== '0x000000000000000000000000000000000000000000000000000000000000') {
 			this._processProduct(product);
 		}
 	}
@@ -45,9 +45,9 @@ export class StoreComponent implements OnInit {
 	public async getProductAtPreviousIndex() {
 		const product = await this._contractService.getProductAtIndex(this.id, --this.product.index).catch(() => {
 			++this.product.index;
-		});;;
+		});
 
-		if (product && product.description !== "0x000000000000000000000000000000000000000000000000000000000000") {
+		if (product && product.description !== '0x000000000000000000000000000000000000000000000000000000000000') {
 			this._processProduct(product);
 		}
 	}
@@ -58,7 +58,7 @@ export class StoreComponent implements OnInit {
 		const value = price.mul(quantity);
 
 		this._contractService.buy(this.id, value, this.product.index, this.buyQuantity)
-			.then(() => { this.buyQuantity = '' });
+			.then(() => { this.buyQuantity = ''; });
 	}
 
 	private async _getStorefront() {
@@ -70,7 +70,7 @@ export class StoreComponent implements OnInit {
 
 			index++;
 
-			if (currentProduct.description === "0x000000000000000000000000000000000000000000000000000000000000") {
+			if (currentProduct.description === '0x000000000000000000000000000000000000000000000000000000000000') {
 				continue;
 			}
 
@@ -84,7 +84,7 @@ export class StoreComponent implements OnInit {
 		let product = await this._contractService.getProductAtIndex(this.id, this.product.index++).catch(() => { });
 
 		let i = 0;
-		while ((!product || product.description === "0x000000000000000000000000000000000000000000000000000000000000") && i < 20) {
+		while ((!product || product.description === '0x000000000000000000000000000000000000000000000000000000000000') && i < 20) {
 			product = await this._contractService.getProductAtIndex(this.id, this.product.index++).catch(() => { });
 			i++;
 		}
