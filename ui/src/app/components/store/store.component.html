@@ -1,0 +1,51 @@
+<div class="jumbotron jumbotron-fluid">
+	<div class="container text-center">
+		<h1 class="display-6 text-center">Welcome to the Storefront!</h1>
+		<div id="accordion">
+			<div class="row">
+				<div class="col-md-6" *ngFor='let product of storefront'>
+					<div class="card">
+						<div class="card-header">
+							Description: {{product.description}}
+						</div>
+						<div class="card-footer">
+							<blockquote class="blockquote text-center">
+								<p class="mb-0">Quantity: {{product.quantity}}</p>
+								<p class="mb-0">Price: {{product.price}} WEI</p>
+								<footer class="blockquote-footer">
+									Store: {{id}}
+								</footer>
+							</blockquote>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="" class="" aria-labelledby="headingOne" data-parent="">
+				<div class="card-body">
+					<h5 class="card-title">Browse Products</h5>
+					<div class="card-header">
+						<blockquote class="blockquote text-center">
+							<p class="mb-0">Description: {{product.description}}</p>
+							<p class="mb-0">Quantity: {{product.quantity}}</p>
+							<p class="mb-0">Price: {{product.price}} WEI</p>
+							<footer class="blockquote-footer">
+								Store: {{id}}
+							</footer>
+						</blockquote>
+					</div>
+					<form>
+						<div class="form-group">
+							<label>Quantity
+								<input type="text" name="productQuantity" class="form-control" aria-describedby="productQuantity" placeholder="42" required
+								 [(ngModel)]='buyQuantity'>
+							</label>
+						</div>
+						<button type="button" class="btn btn-outline-dark" (click)="getProductAtPreviousIndex()">Previous</button>
+						<button type="button" class="btn btn-outline-success" (click)="buy()">Buy</button>
+						<button type="button" class="btn btn-outline-dark" (click)="getProductAtNextIndex()">Next</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

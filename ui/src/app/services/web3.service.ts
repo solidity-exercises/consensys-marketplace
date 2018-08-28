@@ -62,6 +62,10 @@ export class Web3Service {
 		return this._web3.utils.toUtf8(bytes);
 	}
 
+	public toBN(number) {
+		return this._web3.utils.toBN(number);
+	}
+
 	private _bootstrapWeb3() {
 		// Checking if Web3 has been injected by the browser (Mist/MetaMask)
 		if (typeof window.web3 !== 'undefined') {

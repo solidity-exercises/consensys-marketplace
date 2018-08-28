@@ -176,8 +176,7 @@ export class ContractService {
 
 		const storeContract = await this._getStoreContract(storeAddress);
 
-
-		return storeContract.methods.storefront.call(index).catch();
+		return storeContract.methods.storefront(index).call().catch();
 	}
 
 	public async setStorefront(storeAddress, storefrontIndex, productIndex) {
@@ -270,12 +269,14 @@ export class ContractService {
 
 		const bytesDescription = this._web3Service.fromUtf8(description);
 
+		const roundPrice = Math.round(+price);
+
 		const gas = await storeContract.methods
-			.addProduct(bytesDescription, quantity, price)
+			.addProduct(bytesDescription, quantity, roundPrice)
 			.estimateGas({ from: from });
 
 		return storeContract.methods
-			.addProduct(bytesDescription, quantity, price)
+			.addProduct(bytesDescription, quantity, roundPrice)
 			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
 				this._toastr.info(`Add product transaction for store ${storeAddress} hash is ${hash}.`);
@@ -374,12 +375,14 @@ export class ContractService {
 			return;
 		}
 
+		const price = Math.round(+newPrice);
+
 		const gas = await storeContract.methods
-			.setPrice(index, newPrice)
+			.setPrice(index, price)
 			.estimateGas({ from: from });
 
 		return storeContract.methods
-			.setPrice(index, newPrice)
+			.setPrice(index, price)
 			.send({ from: from, gas: gas * 2 })
 			.on('transactionHash', (hash: string) => {
 				this._toastr.info(`Set price transaction for store ${storeAddress} hash is ${hash}.`);
@@ -629,6 +632,8 @@ export class ContractService {
 			.buy(index, quantity)
 			.estimateGas({ from: from, value: value });
 
+		console.log(`gas: ${gas}`);
+
 		return storeContract.methods
 			.buy(index, quantity)
 			.send({ from: from, value: value, gas: gas * 2 })
@@ -651,9 +656,32 @@ export class ContractService {
 
 		const request = await this._marketplace.methods.storeRequests(index).call();
 
+
+		if (!request) {
+			return;
+		}
+
 		const processed = this._ipfsService.getIpfsHashFromBytes32(request[0]);
 
 		return [processed, request[1]];
+	}
+
+	public async getProductAtIndex(storeAddress, index) {
+		if (Number(index) > 65535) {
+			this._toastr.error(`Product index out of range!`);
+			return;
+		}
+
+		const store = this._web3Service.getChecksumAddress(storeAddress);
+
+		if (!store) {
+			this._toastr.error(`${storeAddress} address is not valid!`);
+			return;
+		}
+
+		const storeContract = await this._getStoreContract(storeAddress);
+
+		return storeContract.methods.products(index).call();
 	}
 
 	private async _initContract() {
