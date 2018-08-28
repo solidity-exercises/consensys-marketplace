@@ -4,6 +4,7 @@ import { HomeComponent } from './components/home/home.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { OwnerComponent } from './components/owner/owner.component';
 import { CustomerComponent } from './components/customer/customer.component';
+import { StoreComponent } from './components/store/store.component';
 
 export const routes: Routes = [
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -11,6 +12,7 @@ export const routes: Routes = [
 	{ path: 'admin', component: AdminComponent },
 	{ path: 'owner', component: OwnerComponent },
 	{ path: 'customer', component: CustomerComponent },
+	{ path: 'store/:id', component: StoreComponent },
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
 	{ path: '**', redirectTo: 'home', pathMatch: 'full' }
 ];

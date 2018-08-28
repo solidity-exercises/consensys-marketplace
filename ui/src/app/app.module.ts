@@ -14,6 +14,7 @@ import { OwnerComponent } from './components/owner/owner.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { CustomerComponent } from './components/customer/customer.component';
 import { AppRoutingModule } from './app-routing.module';
+import { StoreComponent } from './components/store/store.component';
 
 @NgModule({
 	declarations: [
@@ -23,7 +24,8 @@ import { AppRoutingModule } from './app-routing.module';
 		HomeComponent,
 		OwnerComponent,
 		AdminComponent,
-		CustomerComponent
+		CustomerComponent,
+		StoreComponent
 	],
 	imports: [
 		BrowserModule,

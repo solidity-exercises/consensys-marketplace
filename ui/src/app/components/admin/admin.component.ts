@@ -38,6 +38,7 @@ export class AdminComponent implements OnInit {
 
 	public async approveNextStore() {
 		this._contractService.approveStore(this.approveStore.isApproved === '1', this.approveStore.index).then(() => {
+			this.getNextStoreRequest();
 			this.approveStore.isApproved = '';
 			this.approveStore.index = '';
 		});
