@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 const ipfsAPI = require('ipfs-api');
 const bs58 = require('bs58');
 
@@ -6,7 +7,13 @@ const bs58 = require('bs58');
 export class IpfsService {
 	private _ipfs;
 	constructor() {
-		this._ipfs = ipfsAPI();
+		const ipfsConfig = {
+            host: environment.ipfsHost,
+            port: environment.ipfsPort,
+            protocol: "http"
+		};
+		
+		this._ipfs = ipfsAPI(ipfsConfig);
 	}
 
 	public async add(files) {

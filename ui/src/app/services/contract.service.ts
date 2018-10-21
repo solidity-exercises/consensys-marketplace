@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Web3Service } from './web3.service';
-import { Contract, TransactionReceipt } from 'web3/types';
+import { TransactionReceipt } from 'web3/types';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
 import { IpfsService } from './ipfs.service';
+import Contract from 'web3/eth/contract';
 
 const storeAbi = require('../../../store-abi.json')['store'];
 @Injectable()

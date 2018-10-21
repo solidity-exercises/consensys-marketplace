@@ -1,8 +1,11 @@
 import * as marketplaceAbi from '../../marketplace-abi.json';
+require('dotenv').config();
 
 export const environment = {
 	production: true,
-	provider: 'http://ganache:8545',
+	provider: 'http://localhost:8545',
 	Abi: marketplaceAbi['marketplace'],
-	address: '0xb42d3214eeC65D3E6A6257a778823aD093cbD7Fd'
+	address: '0xb42d3214eeC65D3E6A6257a778823aD093cbD7Fd',
+	ipfsHost: process.env.IPFS_HOST,
+	ipfsPort: process.env.IPFS_PORT
 };

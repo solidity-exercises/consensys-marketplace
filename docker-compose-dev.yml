@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.7"
 
 networks:
   marketplace-dev:
@@ -44,6 +44,9 @@ services:
       -  ./ui/:/app
       -  ./build/:/build
     working_dir: /app
+    environment:
+      - IPFS_HOST=ipfs
+      - IPFS_PORT=5001
     networks:
       - marketplace-dev
     depends_on:

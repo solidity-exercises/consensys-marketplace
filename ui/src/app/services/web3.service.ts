@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../environments/environment';
+import Contract from 'web3/eth/contract';
 
 // import Web3 from 'web3';
 const Web3 = require('web3');
-
-import { Contract } from 'web3/types';
 
 declare let window: any;
 
