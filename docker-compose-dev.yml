@@ -1,0 +1,54 @@
+version: "3.3"
+
+networks:
+  marketplace-dev:
+
+services:
+  ipfs:
+    container_name: marketplace-dev-ipfs
+    image: ipfs/go-ipfs:release
+    volumes:
+      - ~/.ipfs/:/data/ipfs/
+    networks:
+      - marketplace-dev
+    ports:
+      - 4001:4001
+
+  ganache:
+    container_name: marketplace-dev-ganache
+    image: trufflesuite/ganache-cli:v6.1.8
+    networks:
+      - marketplace-dev
+    command: ["--allowUnlimitedContractSize", "-l", "8000000", "-i", "42", "-m", "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"]
+    ports:
+      - 8545:8545
+
+  contracts:
+    container_name: marketplace-dev-contracts
+    image: node:9
+    volumes:
+      -  .:/app
+    working_dir: /app
+    environment:
+      - DEVELOPMENT_HOST=ganache
+    networks:
+      - marketplace-dev
+    depends_on:
+      - ganache
+    command: bash -c "npm install && npm run deploy"
+
+  ui:
+    container_name: marketplace-dev-ui
+    image: node:9
+    volumes:
+      -  ./ui/:/app
+      -  ./build/:/build
+    working_dir: /app
+    networks:
+      - marketplace-dev
+    depends_on:
+      - contracts
+    command: bash -c "npm install && npm start"
+    ports:
+      - 4200:4200
+      - 49153:49153

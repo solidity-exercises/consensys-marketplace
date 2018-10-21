@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "truffle test",
+    "deploy": "truffle deploy --reset --compile-all",
     "coverage": "./node_modules/.bin/solidity-coverage",
     "solium": "solium -d contracts/",
     "solium:fix": "solium -d contracts/ --fix"
@@ -22,7 +23,10 @@
     "url": "https://github.com/solidity-exercises/consensys-marketplace/issues"
   },
   "homepage": "https://github.com/solidity-exercises/consensys-marketplace#readme",
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "6.1.0",
+    "truffle": "4.1.14"
+  },
   "devDependencies": {
     "coveralls": "3.0.2",
     "solidity-coverage": "0.5.8",

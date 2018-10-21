@@ -7,7 +7,7 @@ const marketplaceAddress = require('../../../build/contracts/UpgradeableProxy.js
 
 export const environment = {
 	production: false,
-	provider: 'http://localhost:8545',
+	provider: 'http://ganache:8545',
 	Abi: marketplaceAbi['abi'],
 	address: marketplaceAddress['networks']['42'].address
 };
